@@ -41,7 +41,7 @@ Everything runs **locally** using **IntelliJ** as the IDE. This is not a hosted/
 ## Current Progress
 
 ### Phase 1 — Project Planning & Database Design
-Om schedule
+On schedule
 
 ### Phase 2 — Backend: Java Server & MariaDB Connection
 
