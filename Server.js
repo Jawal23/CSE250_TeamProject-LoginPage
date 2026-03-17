@@ -2,39 +2,35 @@
 // CSE250 - Team Project: Admin Login System with RBAC
 // Team: Jawal, Yug, Kamya
 // File: Server.js
-// What this file does:
-//   - Connects Node.js to our MariaDB database
-//   - Handles /register (new user signup)
-//   - Handles /login (check username + password + returns role AND permissions)
-//   - Runs a local server on port 3000
+//
+// ROUTES IN THIS FILE:
+//   POST /register    — new user signup
+//   POST /login       — login, returns role + permissions
+//   GET  /users       — fetch all users with roles (SuperAdmin/Admin)
+//   POST /changerole  — update a user's role (SuperAdmin only)
+//   GET  /test        — check if server is running
 // ============================================================
 
-// Step 1: Import the packages we installed
 const express = require("express");
-const mysql = require("mysql2");
-const path = require("path");
+const mysql   = require("mysql2");
+const path    = require("path");
 
-// Step 2: Create the Express app (this is our server)
 const app = express();
 
-// This line lets our server read JSON data sent from the frontend
 app.use(express.json());
-
-// This line lets our server serve HTML files from the same folder
 app.use(express.static(path.join(__dirname)));
 
 
 // ============================================================
-// Step 3: Connect to MariaDB
+// Connect to MariaDB
 // ============================================================
 const db = mysql.createConnection({
-    host: "localhost",                  // MariaDB is running on your own computer
-    user: "root",                       // Your MariaDB username (usually 'root')
-    password: "cse250",                 // Your MariaDB password
-    database: "admin_login_system",     // The name of the database you created
+    host:     "localhost",
+    user:     "root",
+    password: "cse250",
+    database: "admin_login_system",
 });
 
-// Try to connect and show a message
 db.connect(function (err) {
     if (err) {
         console.log("Could not connect to MariaDB:", err.message);
@@ -45,50 +41,42 @@ db.connect(function (err) {
 
 
 // ============================================================
-// Route 1: /register
-// What it does: Saves a new user into the 'users' table
+// Route 1: POST /register
+// Saves a new user into the users table with Viewer role
 // ============================================================
 app.post("/register", function (req, res) {
 
-    const username = req.body.username;
-    const password = req.body.password;
+    const username    = req.body.username;
+    const password    = req.body.password;
     const actual_name = req.body.actual_name;
-    const email = req.body.email;
+    const email       = req.body.email;
 
-    // Basic check — make sure nothing is empty
     if (!username || !password || !actual_name || !email) {
         return res.json({ success: false, message: "All fields are required." });
     }
 
-    // Check if username already exists in the database
+    // Check if username already exists
     const checkQuery = "SELECT * FROM users WHERE username = ?";
     db.query(checkQuery, [username], function (err, results) {
 
-        if (err) {
-            return res.json({ success: false, message: "Database error: " + err.message });
-        }
+        if (err) return res.json({ success: false, message: "Database error: " + err.message });
 
-        // If username already taken, stop here
         if (results.length > 0) {
             return res.json({ success: false, message: "Username already taken. Try another one." });
         }
 
-        // Username is free — insert the new user
+        // Insert new user
         const insertQuery = "INSERT INTO users (actual_name, username, password_hash, email, is_active) VALUES (?, ?, ?, ?, 1)";
         db.query(insertQuery, [actual_name, username, password, email], function (err2, result) {
 
-            if (err2) {
-                return res.json({ success: false, message: "Could not save user: " + err2.message });
-            }
+            if (err2) return res.json({ success: false, message: "Could not save user: " + err2.message });
 
-            // User saved! Now assign them the default role (Viewer = role_id 3)
-            const newUserId = result.insertId;
-            const roleQuery = "INSERT INTO user_roles (user_id, role_id) VALUES (?, 3)";
+            // Assign Viewer role (role_id = 3) by default
+            const newUserId   = result.insertId;
+            const roleQuery   = "INSERT INTO user_roles (user_id, role_id) VALUES (?, 3)";
             db.query(roleQuery, [newUserId], function (err3) {
 
-                if (err3) {
-                    return res.json({ success: false, message: "User created but could not assign role: " + err3.message });
-                }
+                if (err3) return res.json({ success: false, message: "User created but could not assign role: " + err3.message });
 
                 res.json({ success: true, message: "Account created successfully! You can now login." });
             });
@@ -98,40 +86,31 @@ app.post("/register", function (req, res) {
 
 
 // ============================================================
-// Route 2: /login
-// What it does: Checks username + password, returns user's role AND permissions
-//
-// WHAT CHANGED FROM BEFORE:
-//   Before: only fetched the role name after login
-//   Now:    also fetches the list of permissions for that role
-//           and returns everything together in one response
+// Route 2: POST /login
+// Checks username + password, returns role + permissions
 // ============================================================
 app.post("/login", function (req, res) {
 
     const username = req.body.username;
     const password = req.body.password;
 
-    // Basic check
     if (!username || !password) {
         return res.json({ success: false, message: "Please enter both username and password." });
     }
 
-    // Step A: Check if username + password match in the database
+    // Step A: Check credentials
     const loginQuery = "SELECT * FROM users WHERE username = ? AND password_hash = ? AND is_active = 1";
     db.query(loginQuery, [username, password], function (err, results) {
 
-        if (err) {
-            return res.json({ success: false, message: "Database error: " + err.message });
-        }
+        if (err) return res.json({ success: false, message: "Database error: " + err.message });
 
-        // If no match found — wrong credentials
         if (results.length === 0) {
             return res.json({ success: false, message: "Wrong username or password. Please try again." });
         }
 
         const user = results[0];
 
-        // Step B: Fetch this user's role from user_roles + roles tables
+        // Step B: Fetch the user's role
         const roleQuery = `
             SELECT roles.role_id, roles.role_name 
             FROM user_roles 
@@ -140,16 +119,12 @@ app.post("/login", function (req, res) {
         `;
         db.query(roleQuery, [user.user_id], function (err2, roleResults) {
 
-            if (err2) {
-                return res.json({ success: false, message: "Login ok but could not fetch role: " + err2.message });
-            }
+            if (err2) return res.json({ success: false, message: "Login ok but could not fetch role: " + err2.message });
 
-            // Default to Viewer if no role found
             const roleName = roleResults.length > 0 ? roleResults[0].role_name : "Viewer";
-            const roleId = roleResults.length > 0 ? roleResults[0].role_id : 3;
+            const roleId   = roleResults.length > 0 ? roleResults[0].role_id   : 3;
 
-            // Step C: Fetch all permissions linked to this role
-            // This is the NEW part we added for Phase 3
+            // Step C: Fetch permissions for this role
             const permissionsQuery = `
                 SELECT permissions.permission_name 
                 FROM role_permissions 
@@ -158,29 +133,23 @@ app.post("/login", function (req, res) {
             `;
             db.query(permissionsQuery, [roleId], function (err3, permissionResults) {
 
-                if (err3) {
-                    return res.json({ success: false, message: "Login ok but could not fetch permissions: " + err3.message });
-                }
+                if (err3) return res.json({ success: false, message: "Login ok but could not fetch permissions: " + err3.message });
 
-                // Convert the results into a simple array of permission names
-                // Example: ["view_dashboard", "view_users", "edit_users"]
+                // Convert to a simple array of names
                 const permissionsList = permissionResults.map(function (row) {
                     return row.permission_name;
                 });
 
-                // Step D: Send everything back to the frontend in one response
+                // Step D: Send everything back
                 res.json({
                     success: true,
                     message: "Login successful!",
                     user: {
-                        user_id: user.user_id,
+                        user_id:     user.user_id,
                         actual_name: user.actual_name,
-                        username: user.username,
-                        role: roleName,
+                        username:    user.username,
+                        role:        roleName,
                         permissions: permissionsList,
-                        // Example of what the frontend will receive:
-                        // role: "SuperAdmin"
-                        // permissions: ["view_dashboard", "view_users", "edit_users", "view_reports", "edit_roles", "view_system_info", "full_access"]
                     }
                 });
             });
@@ -190,8 +159,78 @@ app.post("/login", function (req, res) {
 
 
 // ============================================================
-// Route 3: /test (just to confirm server is working)
-// Open http://localhost:3000/test in your browser to check
+// Route 3: GET /users
+// Returns all users with their assigned role name
+// Used by SuperAdmin and Admin dashboards
+// ============================================================
+app.get("/users", function (req, res) {
+
+    const query = `
+        SELECT 
+            users.user_id,
+            users.actual_name,
+            users.username,
+            users.email,
+            roles.role_name
+        FROM users
+        LEFT JOIN user_roles  ON users.user_id   = user_roles.user_id
+        LEFT JOIN roles       ON user_roles.role_id = roles.role_id
+        ORDER BY users.created_at DESC
+    `;
+
+    db.query(query, function (err, results) {
+
+        if (err) return res.json({ success: false, message: "Could not fetch users: " + err.message });
+
+        res.json({ success: true, users: results });
+    });
+});
+
+
+// ============================================================
+// Route 4: POST /changerole
+// Updates a user's role in user_roles table
+// Only SuperAdmin should call this (enforced on frontend)
+// Body: { user_id: 5, role_id: 2 }
+// ============================================================
+app.post("/changerole", function (req, res) {
+
+    const userId = req.body.user_id;
+    const roleId = req.body.role_id;
+
+    if (!userId || !roleId) {
+        return res.json({ success: false, message: "user_id and role_id are required." });
+    }
+
+    // Update the role in user_roles table
+    // If the user already has a role, update it. If not, insert a new row.
+    const checkQuery = "SELECT * FROM user_roles WHERE user_id = ?";
+    db.query(checkQuery, [userId], function (err, results) {
+
+        if (err) return res.json({ success: false, message: "Database error: " + err.message });
+
+        if (results.length > 0) {
+            // User already has a role — update it
+            const updateQuery = "UPDATE user_roles SET role_id = ? WHERE user_id = ?";
+            db.query(updateQuery, [roleId, userId], function (err2) {
+                if (err2) return res.json({ success: false, message: "Could not update role: " + err2.message });
+                res.json({ success: true, message: "Role updated successfully." });
+            });
+        } else {
+            // No role yet — insert new row
+            const insertQuery = "INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)";
+            db.query(insertQuery, [userId, roleId], function (err2) {
+                if (err2) return res.json({ success: false, message: "Could not assign role: " + err2.message });
+                res.json({ success: true, message: "Role assigned successfully." });
+            });
+        }
+    });
+});
+
+
+// ============================================================
+// Route 5: GET /test
+// Open http://localhost:3000/test to confirm server is running
 // ============================================================
 app.get("/test", function (req, res) {
     res.json({ message: "Server is running! MariaDB connection is active." });
@@ -199,9 +238,9 @@ app.get("/test", function (req, res) {
 
 
 // ============================================================
-// Start the server on port 3000
+// Start the server
 // ============================================================
 app.listen(3000, function () {
     console.log("Server is running at http://localhost:3000");
-    console.log("Test it by opening http://localhost:3000/test in your browser");
+    console.log("Open http://localhost:3000/login.html to use the app");
 });
