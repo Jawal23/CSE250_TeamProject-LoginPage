@@ -5,7 +5,7 @@
 // What this file does:
 //   - Connects Node.js to our MariaDB database
 //   - Handles /register (new user signup)
-//   - Handles /login (check username + password)
+//   - Handles /login (check username + password + returns role AND permissions)
 //   - Runs a local server on port 3000
 // ============================================================
 
@@ -26,12 +26,11 @@ app.use(express.static(path.join(__dirname)));
 
 // ============================================================
 // Step 3: Connect to MariaDB
-// Change these values to match YOUR MariaDB setup
 // ============================================================
 const db = mysql.createConnection({
     host: "localhost",                  // MariaDB is running on your own computer
     user: "root",                       // Your MariaDB username (usually 'root')
-    password: "cse250",                 // Your MariaDB password (whatever you set during install)
+    password: "cse250",                 // Your MariaDB password
     database: "admin_login_system",     // The name of the database you created
 });
 
@@ -48,11 +47,9 @@ db.connect(function (err) {
 // ============================================================
 // Route 1: /register
 // What it does: Saves a new user into the 'users' table
-// How to test: POST to http://localhost:3000/register
 // ============================================================
 app.post("/register", function (req, res) {
 
-    // Get the data the user typed in the form
     const username = req.body.username;
     const password = req.body.password;
     const actual_name = req.body.actual_name;
@@ -77,7 +74,6 @@ app.post("/register", function (req, res) {
         }
 
         // Username is free — insert the new user
-        // Note: We are storing plain text password (fine for a demo project)
         const insertQuery = "INSERT INTO users (actual_name, username, password_hash, email, is_active) VALUES (?, ?, ?, ?, 1)";
         db.query(insertQuery, [actual_name, username, password, email], function (err2, result) {
 
@@ -103,8 +99,12 @@ app.post("/register", function (req, res) {
 
 // ============================================================
 // Route 2: /login
-// What it does: Checks username + password, returns user's role
-// How to test: POST to http://localhost:3000/login
+// What it does: Checks username + password, returns user's role AND permissions
+//
+// WHAT CHANGED FROM BEFORE:
+//   Before: only fetched the role name after login
+//   Now:    also fetches the list of permissions for that role
+//           and returns everything together in one response
 // ============================================================
 app.post("/login", function (req, res) {
 
@@ -116,7 +116,7 @@ app.post("/login", function (req, res) {
         return res.json({ success: false, message: "Please enter both username and password." });
     }
 
-    // Check if username + password match in the database
+    // Step A: Check if username + password match in the database
     const loginQuery = "SELECT * FROM users WHERE username = ? AND password_hash = ? AND is_active = 1";
     db.query(loginQuery, [username, password], function (err, results) {
 
@@ -129,33 +129,60 @@ app.post("/login", function (req, res) {
             return res.json({ success: false, message: "Wrong username or password. Please try again." });
         }
 
-        // Login matched! Get this user's role
         const user = results[0];
+
+        // Step B: Fetch this user's role from user_roles + roles tables
         const roleQuery = `
-      SELECT roles.role_name 
-      FROM user_roles 
-      JOIN roles ON user_roles.role_id = roles.role_id 
-      WHERE user_roles.user_id = ?
-    `;
+            SELECT roles.role_id, roles.role_name 
+            FROM user_roles 
+            JOIN roles ON user_roles.role_id = roles.role_id 
+            WHERE user_roles.user_id = ?
+        `;
         db.query(roleQuery, [user.user_id], function (err2, roleResults) {
 
             if (err2) {
                 return res.json({ success: false, message: "Login ok but could not fetch role: " + err2.message });
             }
 
-            // Get the role name (default to Viewer if none assigned)
+            // Default to Viewer if no role found
             const roleName = roleResults.length > 0 ? roleResults[0].role_name : "Viewer";
+            const roleId = roleResults.length > 0 ? roleResults[0].role_id : 3;
 
-            // Send back success + user info to the frontend
-            res.json({
-                success: true,
-                message: "Login successful!",
-                user: {
-                    user_id: user.user_id,
-                    actual_name: user.actual_name,
-                    username: user.username,
-                    role: roleName,
+            // Step C: Fetch all permissions linked to this role
+            // This is the NEW part we added for Phase 3
+            const permissionsQuery = `
+                SELECT permissions.permission_name 
+                FROM role_permissions 
+                JOIN permissions ON role_permissions.permission_id = permissions.permission_id 
+                WHERE role_permissions.role_id = ?
+            `;
+            db.query(permissionsQuery, [roleId], function (err3, permissionResults) {
+
+                if (err3) {
+                    return res.json({ success: false, message: "Login ok but could not fetch permissions: " + err3.message });
                 }
+
+                // Convert the results into a simple array of permission names
+                // Example: ["view_dashboard", "view_users", "edit_users"]
+                const permissionsList = permissionResults.map(function (row) {
+                    return row.permission_name;
+                });
+
+                // Step D: Send everything back to the frontend in one response
+                res.json({
+                    success: true,
+                    message: "Login successful!",
+                    user: {
+                        user_id: user.user_id,
+                        actual_name: user.actual_name,
+                        username: user.username,
+                        role: roleName,
+                        permissions: permissionsList,
+                        // Example of what the frontend will receive:
+                        // role: "SuperAdmin"
+                        // permissions: ["view_dashboard", "view_users", "edit_users", "view_reports", "edit_roles", "view_system_info", "full_access"]
+                    }
+                });
             });
         });
     });
