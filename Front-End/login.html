@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login — CSE250 RBAC System</title>
+    <style>
+
+        /* ── Reset ── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ── Page background ── */
+        body {
+            background-color: #020101;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            color: #f0f0f0;
+        }
+
+        /* ── Top label ── */
+        .top-label {
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #888888;
+            margin-bottom: 24px;
+        }
+
+        /* ── The glowing card ── */
+        .card {
+            background: #111111;
+            border: 1px solid rgba(183, 65, 14, 0.35);
+            border-radius: 14px;
+            padding: 40px 36px;
+            width: 380px;
+            /* Orange glow effect */
+            box-shadow:
+                    0 0 30px rgba(183, 65, 14, 0.25),
+                    0 0 80px rgba(183, 65, 14, 0.10),
+                    0 0 2px  rgba(183, 65, 14, 0.40);
+        }
+
+        /* ── Card title ── */
+        .card h1 {
+            font-size: 22px;
+            font-weight: bold;
+            color: #f0f0f0;
+            margin-bottom: 6px;
+        }
+        .card .subtitle {
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 32px;
+        }
+
+        /* ── Form labels ── */
+        label {
+            display: block;
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 6px;
+        }
+
+        /* ── Input fields ── */
+        input {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 11px 14px;
+            font-size: 14px;
+            color: #f0f0f0;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            border-color: #b7410e;
+        }
+
+        /* ── Login button ── */
+        .btn {
+            width: 100%;
+            background: #b7410e;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #f0f0f0;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn:hover  { background: #d4501a; }
+        .btn:active { transform: scale(0.98); }
+
+        /* ── Message (success / error) ── */
+        .message {
+            margin-top: 16px;
+            font-size: 13px;
+            text-align: center;
+            min-height: 20px;
+        }
+        .message.error   { color: #ef4444; }
+        .message.success { color: #22c55e; }
+
+        /* ── Bottom link ── */
+        .bottom-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #888888;
+        }
+        .bottom-link a {
+            color: #b7410e;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .bottom-link a:hover { text-decoration: underline; }
+
+        /* ── Orange accent line at top of card ── */
+        .card-top-bar {
+            height: 3px;
+            background: linear-gradient(90deg, #b7410e, transparent);
+            border-radius: 14px 14px 0 0;
+            margin: -40px -36px 32px -36px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="top-label">CSE250 — Database Management Systems</div>
+
+<div class="card">
+    <div class="card-top-bar"></div>
+
+    <h1>Welcome Back</h1>
+    <div class="subtitle">Sign in to your account</div>
+
+    <!-- Username -->
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Enter your username" />
+
+    <!-- Password -->
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Enter your password" />
+
+    <!-- Login Button -->
+    <button class="btn" onclick="handleLogin()">Login</button>
+
+    <!-- Message area -->
+    <div class="message" id="message"></div>
+
+    <!-- Register link -->
+    <div class="bottom-link">
+        Don't have an account? <a href="register.html">Register here</a>
+    </div>
+</div>
+
+
+<script>
+
+    // ── handleLogin ──────────────────────────────────────────
+    // Sends username + password to /login route in Server.js
+    // If success → save user data and go to dashboard
+    // If fail    → show error message
+    // ─────────────────────────────────────────────────────────
+    function handleLogin() {
+
+        var username = document.getElementById("username").value.trim();
+        var password = document.getElementById("password").value.trim();
+        var msgBox   = document.getElementById("message");
+
+        // Basic frontend check
+        if (!username || !password) {
+            msgBox.className = "message error";
+            msgBox.textContent = "Please enter both username and password.";
+            return;
+        }
+
+        msgBox.className = "message";
+        msgBox.textContent = "Logging in...";
+
+        // Send login request to our Node.js server
+        fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: username, password: password })
+        })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+
+                if (data.success) {
+                    // Save user info to sessionStorage so dashboard can read it
+                    //save it
+                    sessionStorage.setItem("user", JSON.stringify(data.user));
+
+                    msgBox.className = "message success";
+                    msgBox.textContent = "Login successful! Redirecting...";
+
+                    // Go to dashboard after a short delay
+                    setTimeout(function() {
+                        window.location.href = "dashboard.html";
+                    }, 800);
+
+                } else {
+                    msgBox.className = "message error";
+                    msgBox.textContent = data.message;
+                }
+            })
+            .catch(function(err) {
+                msgBox.className = "message error";
+                msgBox.textContent = "Could not reach server. Is it running?";
+            });
+    }
+
+    // Allow pressing Enter key to submit
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") handleLogin();
+    });
+
+</script>
+</body>
+</html>
