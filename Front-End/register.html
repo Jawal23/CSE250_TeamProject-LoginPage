@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Register — CSE250 RBAC System</title>
+    <style>
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #020101;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            color: #f0f0f0;
+            padding: 40px 0;
+        }
+
+        .top-label {
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #888888;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: #111111;
+            border: 1px solid rgba(183, 65, 14, 0.35);
+            border-radius: 14px;
+            padding: 40px 36px;
+            width: 380px;
+            box-shadow:
+                    0 0 30px rgba(183, 65, 14, 0.25),
+                    0 0 80px rgba(183, 65, 14, 0.10),
+                    0 0 2px  rgba(183, 65, 14, 0.40);
+        }
+
+        .card h1 {
+            font-size: 22px;
+            font-weight: bold;
+            color: #f0f0f0;
+            margin-bottom: 6px;
+        }
+        .card .subtitle {
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 32px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 11px 14px;
+            font-size: 14px;
+            color: #f0f0f0;
+            margin-bottom: 20px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: #b7410e; }
+
+        /* Small helper text under role field */
+        .helper-text {
+            font-size: 11px;
+            color: #555555;
+            margin-top: -14px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            width: 100%;
+            background: #b7410e;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            color: #f0f0f0;
+            cursor: pointer;
+            margin-top: 4px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn:hover  { background: #d4501a; }
+        .btn:active { transform: scale(0.98); }
+
+        .message {
+            margin-top: 16px;
+            font-size: 13px;
+            text-align: center;
+            min-height: 20px;
+        }
+        .message.error   { color: #ef4444; }
+        .message.success { color: #22c55e; }
+
+        .bottom-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #888888;
+        }
+        .bottom-link a {
+            color: #b7410e;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .bottom-link a:hover { text-decoration: underline; }
+
+        .card-top-bar {
+            height: 3px;
+            background: linear-gradient(90deg, #b7410e, transparent);
+            border-radius: 14px 14px 0 0;
+            margin: -40px -36px 32px -36px;
+        }
+
+        /* Role badge shown after successful register */
+        .role-badge {
+            display: inline-block;
+            background: rgba(183, 65, 14, 0.15);
+            border: 1px solid #b7410e;
+            color: #b7410e;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 99px;
+            margin-top: 8px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="top-label">CSE250 — Database Management Systems</div>
+
+<div class="card">
+    <div class="card-top-bar"></div>
+
+    <h1>Create Account</h1>
+    <div class="subtitle">All new accounts are assigned the Viewer role</div>
+
+    <!-- Full Name -->
+    <label for="actual_name">Full Name</label>
+    <input type="text" id="actual_name" placeholder="Enter your full name" />
+
+    <!-- Username -->
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Choose a username" />
+
+    <!-- Email -->
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="Enter your email" />
+
+    <!-- Password -->
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Choose a password" />
+
+    <!-- Register Button -->
+    <button class="btn" onclick="handleRegister()">Create Account</button>
+
+    <!-- Message area -->
+    <div class="message" id="message"></div>
+
+    <!-- Login link -->
+    <div class="bottom-link">
+        Already have an account? <a href="login.html">Login here</a>
+    </div>
+</div>
+
+
+<script>
+
+    // ── handleRegister ───────────────────────────────────────
+    // Sends form data to /register route in Server.js
+    // If success → show success message + redirect to login
+    // If fail    → show error message
+    // ─────────────────────────────────────────────────────────
+    function handleRegister() {
+
+        var actual_name = document.getElementById("actual_name").value.trim();
+        var username    = document.getElementById("username").value.trim();
+        var email       = document.getElementById("email").value.trim();
+        var password    = document.getElementById("password").value.trim();
+        var msgBox      = document.getElementById("message");
+
+        // Basic frontend check
+        if (!actual_name || !username || !email || !password) {
+            msgBox.className = "message error";
+            msgBox.textContent = "Please fill in all fields.";
+            return;
+        }
+
+        msgBox.className = "message";
+        msgBox.textContent = "Creating your account...";
+
+        // Send register request to our Node.js server
+        fetch("/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                actual_name: actual_name,
+                username: username,
+                email: email,
+                password: password
+            })
+        })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+
+                if (data.success) {
+                    msgBox.className = "message success";
+                    msgBox.textContent = data.message + " Redirecting to login...";
+
+                    // Go back to login page after short delay
+                    setTimeout(function() {
+                        window.location.href = "login.html";
+                    }, 2000);
+
+                } else {
+                    msgBox.className = "message error";
+                    msgBox.textContent = data.message;
+                }
+            })
+            .catch(function(err) {
+                msgBox.className = "message error";
+                msgBox.textContent = "Could not reach server. Is it running?";
+            });
+    }
+
+    // Allow pressing Enter key to submit
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") handleRegister();
+    });
+
+</script>
+</body>
+</html>
