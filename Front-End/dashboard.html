@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dashboard — CSE250 RBAC System</title>
+    <style>
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #020101;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: #f0f0f0;
+        }
+
+        /* ── Top header bar ── */
+        .header {
+            background: #111111;
+            border-bottom: 1px solid rgba(183, 65, 14, 0.3);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-left .app-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #b7410e;
+            letter-spacing: 1px;
+        }
+        .header-left .course-label {
+            font-size: 11px;
+            color: #555555;
+            margin-top: 2px;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .user-info {
+            text-align: right;
+        }
+        .user-info .user-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #f0f0f0;
+        }
+        .role-badge {
+            display: inline-block;
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 99px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 3px;
+        }
+        /* Different colors per role */
+        .badge-superadmin { background: rgba(183,65,14,0.2); border: 1px solid #b7410e; color: #b7410e; }
+        .badge-admin      { background: rgba(183,65,14,0.1); border: 1px solid #b7410e88; color: #d4501a; }
+        .badge-viewer     { background: rgba(136,136,136,0.15); border: 1px solid #555; color: #888888; }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #b7410e;
+            color: #b7410e;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background: rgba(183,65,14,0.15); }
+
+        /* ── Main content area ── */
+        .main {
+            padding: 32px;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        /* ── Welcome card ── */
+        .welcome-card {
+            background: #111111;
+            border: 1px solid rgba(183,65,14,0.25);
+            border-left: 3px solid #b7410e;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 28px;
+        }
+        .welcome-card h2 {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+        .welcome-card p {
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 16px;
+        }
+
+        /* ── Permissions list ── */
+        .permissions-title {
+            font-size: 12px;
+            color: #555555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .permissions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .permission-tag {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            color: #888888;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        /* ── Section heading ── */
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f0f0f0;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #222222;
+        }
+        .section-title span {
+            color: #b7410e;
+        }
+
+        /* ── Users Table (SuperAdmin only) ── */
+        .section {
+            background: #111111;
+            border: 1px solid #222222;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th {
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555555;
+            padding: 0 0 12px 0;
+            border-bottom: 1px solid #222222;
+        }
+        td {
+            padding: 12px 0;
+            border-bottom: 1px solid #1a1a1a;
+            color: #f0f0f0;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+
+        /* Role dropdown in table */
+        select {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            color: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            outline: none;
+        }
+        select:focus { border-color: #b7410e; }
+
+        .change-btn {
+            background: #b7410e;
+            border: none;
+            color: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: background 0.2s;
+        }
+        .change-btn:hover { background: #d4501a; }
+
+        /* ── Info message for limited roles ── */
+        .info-box {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-size: 14px;
+            color: #888888;
+            margin-top: 8px;
+        }
+        .info-box strong { color: #f0f0f0; }
+
+        /* ── Notification toast ── */
+        #toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: #111111;
+            border: 1px solid #b7410e;
+            color: #f0f0f0;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+            box-shadow: 0 0 20px rgba(183,65,14,0.3);
+        }
+
+        /* Loading text */
+        .loading { color: #555555; font-size: 13px; font-style: italic; }
+
+    </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="header">
+    <div class="header-left">
+        <div class="app-name">RBAC Admin System</div>
+        <div class="course-label">CSE250 — Ahmedabad University</div>
+    </div>
+    <div class="header-right">
+        <div class="user-info">
+            <div class="user-name" id="header-name">Loading...</div>
+            <div id="header-badge"></div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+</div>
+
+<!-- ── Main Content ── -->
+<div class="main">
+
+    <!-- Welcome Card (shown to everyone) -->
+    <div class="welcome-card">
+        <h2 id="welcome-text">Welcome</h2>
+        <p id="welcome-sub">You are logged in.</p>
+        <div class="permissions-title">Your Permissions</div>
+        <div class="permissions-list" id="permissions-list">
+            <span class="loading">Loading permissions...</span>
+        </div>
+    </div>
+
+    <!-- SuperAdmin Section -->
+    <div id="superadmin-section" style="display:none;">
+
+        <!-- All Users Table -->
+        <div class="section">
+            <div class="section-title">All Registered Users <span>— SuperAdmin View</span></div>
+            <div id="users-table-container">
+                <span class="loading">Fetching users from database...</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Admin Section -->
+    <div id="admin-section" style="display:none;">
+        <div class="section">
+            <div class="section-title">User List <span>— Admin View</span></div>
+            <div id="admin-users-container">
+                <span class="loading">Fetching users from database...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Viewer Section -->
+    <div id="viewer-section" style="display:none;">
+        <div class="section">
+            <div class="section-title">Your Access <span>— Viewer</span></div>
+            <div class="info-box">
+                You have <strong>Viewer access</strong>. You can view the dashboard and see the user list. To get more permissions, contact your SuperAdmin.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+
+<script>
+
+    // ── On page load: read user from sessionStorage ──────────
+    var user = JSON.parse(sessionStorage.getItem("user"));
+
+    // If not logged in, send back to login page
+    if (!user) {
+        window.location.href = "login.html";
+    }
+
+    // ── Fill in header ────────────────────────────────────────
+    document.getElementById("header-name").textContent = user.actual_name;
+
+    var badgeEl = document.getElementById("header-badge");
+    var badgeClass = "role-badge ";
+    if (user.role === "SuperAdmin") badgeClass += "badge-superadmin";
+    else if (user.role === "Admin")  badgeClass += "badge-admin";
+    else                             badgeClass += "badge-viewer";
+    badgeEl.innerHTML = '<span class="' + badgeClass + '">' + user.role.toUpperCase() + '</span>';
+
+    // ── Fill in welcome card ──────────────────────────────────
+    document.getElementById("welcome-text").textContent = "Welcome, " + user.actual_name + "!";
+    document.getElementById("welcome-sub").textContent  = "You are logged in as: " + user.role;
+
+    // Show permissions as tags
+    var permList = document.getElementById("permissions-list");
+    if (user.permissions && user.permissions.length > 0) {
+        permList.innerHTML = "";
+        user.permissions.forEach(function(perm) {
+            var tag = document.createElement("span");
+            tag.className = "permission-tag";
+            tag.textContent = perm;
+            permList.appendChild(tag);
+        });
+    } else {
+        permList.innerHTML = '<span class="loading">No permissions found.</span>';
+    }
+
+    // ── Show the right section based on role ─────────────────
+    if (user.role === "SuperAdmin") {
+        document.getElementById("superadmin-section").style.display = "block";
+        loadAllUsers("superadmin");
+
+    } else if (user.role === "Admin") {
+        document.getElementById("admin-section").style.display = "block";
+        loadAllUsers("admin");
+
+    } else {
+        document.getElementById("viewer-section").style.display = "block";
+    }
+
+
+    // ── loadAllUsers ─────────────────────────────────────────
+    // Fetches all users from /users route in Server.js
+    // SuperAdmin gets role-change dropdown, Admin gets read-only
+    // ─────────────────────────────────────────────────────────
+    function loadAllUsers(viewerRole) {
+
+        fetch("/users")
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+
+                if (!data.success) {
+                    showError(viewerRole, "Could not load users: " + data.message);
+                    return;
+                }
+
+                var users = data.users;
+                var containerId = viewerRole === "superadmin" ? "users-table-container" : "admin-users-container";
+                var container = document.getElementById(containerId);
+
+                // Build the table
+                var html = '<table>';
+                html += '<thead><tr>';
+                html += '<th>Name</th><th>Username</th><th>Email</th><th>Role</th>';
+                if (viewerRole === "superadmin") html += '<th>Change Role</th>';
+                html += '</tr></thead><tbody>';
+
+                users.forEach(function(u) {
+                    html += '<tr>';
+                    html += '<td>' + u.actual_name + '</td>';
+                    html += '<td>' + u.username + '</td>';
+                    html += '<td>' + (u.email || '—') + '</td>';
+                    html += '<td>' + (u.role_name || 'No Role') + '</td>';
+
+                    // SuperAdmin gets a dropdown to change roles
+                    if (viewerRole === "superadmin") {
+                        html += '<td>';
+                        html += '<select id="role-select-' + u.user_id + '">';
+                        html += '<option value="1"' + (u.role_name === "SuperAdmin" ? " selected" : "") + '>SuperAdmin</option>';
+                        html += '<option value="2"' + (u.role_name === "Admin"      ? " selected" : "") + '>Admin</option>';
+                        html += '<option value="3"' + (u.role_name === "Viewer"     ? " selected" : "") + '>Viewer</option>';
+                        html += '</select>';
+                        html += '<button class="change-btn" onclick="changeRole(' + u.user_id + ')">Save</button>';
+                        html += '</td>';
+                    }
+
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            })
+            .catch(function(err) {
+                showError(viewerRole, "Could not reach server.");
+            });
+    }
+
+    function showError(viewerRole, msg) {
+        var id = viewerRole === "superadmin" ? "users-table-container" : "admin-users-container";
+        document.getElementById(id).innerHTML = '<span style="color:#ef4444">' + msg + '</span>';
+    }
+
+
+    // ── changeRole ───────────────────────────────────────────
+    // SuperAdmin only: sends new role for a user to /changerole
+    // ─────────────────────────────────────────────────────────
+    function changeRole(userId) {
+
+        var select  = document.getElementById("role-select-" + userId);
+        var newRole = select.value;
+
+        fetch("/changerole", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: userId, role_id: newRole })
+        })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    showToast("Role updated successfully!");
+                    loadAllUsers("superadmin"); // Refresh the table
+                } else {
+                    showToast("Error: " + data.message);
+                }
+            })
+            .catch(function() {
+                showToast("Could not reach server.");
+            });
+    }
+
+
+    // ── logout ────────────────────────────────────────────────
+    function logout() {
+        sessionStorage.removeItem("user");
+        window.location.href = "login.html";
+    }
+
+
+    // ── showToast ─────────────────────────────────────────────
+    // Shows a small notification at the bottom right of screen
+    // ─────────────────────────────────────────────────────────
+    function showToast(msg) {
+        var toast = document.getElementById("toast");
+        toast.textContent = msg;
+        toast.style.display = "block";
+        setTimeout(function() { toast.style.display = "none"; }, 3000);
+    }
+
+</script>
+</body>
+</html>
