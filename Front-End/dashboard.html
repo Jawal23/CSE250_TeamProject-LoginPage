@@ -40,9 +40,7 @@
             align-items: center;
             gap: 16px;
         }
-        .user-info {
-            text-align: right;
-        }
+        .user-info { text-align: right; }
         .user-info .user-name {
             font-size: 14px;
             font-weight: bold;
@@ -57,10 +55,9 @@
             letter-spacing: 1px;
             margin-top: 3px;
         }
-        /* Different colors per role */
-        .badge-superadmin { background: rgba(183,65,14,0.2); border: 1px solid #b7410e; color: #b7410e; }
-        .badge-admin      { background: rgba(183,65,14,0.1); border: 1px solid #b7410e88; color: #d4501a; }
-        .badge-viewer     { background: rgba(136,136,136,0.15); border: 1px solid #555; color: #888888; }
+        .badge-superadmin { background: rgba(183,65,14,0.2);  border: 1px solid #b7410e;   color: #b7410e; }
+        .badge-admin      { background: rgba(183,65,14,0.1);  border: 1px solid #b7410e88; color: #d4501a; }
+        .badge-viewer     { background: rgba(136,136,136,0.15); border: 1px solid #555;    color: #888888; }
 
         .logout-btn {
             background: transparent;
@@ -90,17 +87,9 @@
             padding: 24px 28px;
             margin-bottom: 28px;
         }
-        .welcome-card h2 {
-            font-size: 20px;
-            margin-bottom: 6px;
-        }
-        .welcome-card p {
-            font-size: 13px;
-            color: #888888;
-            margin-bottom: 16px;
-        }
+        .welcome-card h2 { font-size: 20px; margin-bottom: 6px; }
+        .welcome-card p  { font-size: 13px; color: #888888; margin-bottom: 16px; }
 
-        /* ── Permissions list ── */
         .permissions-title {
             font-size: 12px;
             color: #555555;
@@ -108,11 +97,7 @@
             letter-spacing: 1px;
             margin-bottom: 10px;
         }
-        .permissions-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+        .permissions-list { display: flex; flex-wrap: wrap; gap: 8px; }
         .permission-tag {
             background: #1a1a1a;
             border: 1px solid #333333;
@@ -122,7 +107,14 @@
             border-radius: 6px;
         }
 
-        /* ── Section heading ── */
+        /* ── Section ── */
+        .section {
+            background: #111111;
+            border: 1px solid #222222;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
         .section-title {
             font-size: 16px;
             font-weight: bold;
@@ -131,19 +123,73 @@
             padding-bottom: 10px;
             border-bottom: 1px solid #222222;
         }
-        .section-title span {
+        .section-title span { color: #b7410e; }
+
+        /* ── Version cards (Phase 5) ── */
+        .version-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 0;
+        }
+
+        .version-card {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        /* If warning, card border turns orange */
+        .version-card.warning {
+            border-color: #b7410e;
+            background: rgba(183, 65, 14, 0.08);
+        }
+
+        .version-card .version-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555555;
+            margin-bottom: 8px;
+        }
+        .version-card .version-number {
+            font-size: 22px;
+            font-weight: bold;
+            color: #f0f0f0;
+            margin-bottom: 6px;
+            font-family: monospace;
+        }
+        .version-card .version-minimum {
+            font-size: 12px;
+            color: #555555;
+        }
+
+        /* Warning badge shown if version is too old */
+        .version-warning {
+            display: inline-block;
+            background: rgba(183, 65, 14, 0.2);
+            border: 1px solid #b7410e;
             color: #b7410e;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            margin-top: 8px;
         }
 
-        /* ── Users Table (SuperAdmin only) ── */
-        .section {
-            background: #111111;
-            border: 1px solid #222222;
-            border-radius: 12px;
-            padding: 24px 28px;
-            margin-bottom: 24px;
+        /* OK badge shown if version is fine */
+        .version-ok {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            margin-top: 8px;
         }
 
+        /* ── Users Table ── */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -166,7 +212,6 @@
         }
         tr:last-child td { border-bottom: none; }
 
-        /* Role dropdown in table */
         select {
             background: #1a1a1a;
             border: 1px solid #333333;
@@ -192,7 +237,7 @@
         }
         .change-btn:hover { background: #d4501a; }
 
-        /* ── Info message for limited roles ── */
+        /* ── Info box for Viewer ── */
         .info-box {
             background: #1a1a1a;
             border: 1px solid #333333;
@@ -200,11 +245,10 @@
             padding: 16px 20px;
             font-size: 14px;
             color: #888888;
-            margin-top: 8px;
         }
         .info-box strong { color: #f0f0f0; }
 
-        /* ── Notification toast ── */
+        /* ── Toast notification ── */
         #toast {
             position: fixed;
             bottom: 32px;
@@ -219,7 +263,6 @@
             box-shadow: 0 0 20px rgba(183,65,14,0.3);
         }
 
-        /* Loading text */
         .loading { color: #555555; font-size: 13px; font-style: italic; }
 
     </style>
@@ -244,7 +287,7 @@
 <!-- ── Main Content ── -->
 <div class="main">
 
-    <!-- Welcome Card (shown to everyone) -->
+    <!-- Welcome Card — shown to everyone -->
     <div class="welcome-card">
         <h2 id="welcome-text">Welcome</h2>
         <p id="welcome-sub">You are logged in.</p>
@@ -254,8 +297,16 @@
         </div>
     </div>
 
-    <!-- SuperAdmin Section -->
+    <!-- ── SuperAdmin Section ── -->
     <div id="superadmin-section" style="display:none;">
+
+        <!-- Version Check Card (Phase 5) — SuperAdmin only -->
+        <div class="section">
+            <div class="section-title">System Version Info <span>— SuperAdmin Only</span></div>
+            <div class="version-grid" id="version-grid">
+                <span class="loading">Fetching version info...</span>
+            </div>
+        </div>
 
         <!-- All Users Table -->
         <div class="section">
@@ -267,7 +318,7 @@
 
     </div>
 
-    <!-- Admin Section -->
+    <!-- ── Admin Section ── -->
     <div id="admin-section" style="display:none;">
         <div class="section">
             <div class="section-title">User List <span>— Admin View</span></div>
@@ -277,7 +328,7 @@
         </div>
     </div>
 
-    <!-- Viewer Section -->
+    <!-- ── Viewer Section ── -->
     <div id="viewer-section" style="display:none;">
         <div class="section">
             <div class="section-title">Your Access <span>— Viewer</span></div>
@@ -295,10 +346,10 @@
 
 <script>
 
-    // ── On page load: read user from sessionStorage ──────────
+    // ── Read logged-in user from sessionStorage ───────────────
     var user = JSON.parse(sessionStorage.getItem("user"));
 
-    // If not logged in, send back to login page
+    // If not logged in, go back to login
     if (!user) {
         window.location.href = "login.html";
     }
@@ -306,11 +357,11 @@
     // ── Fill in header ────────────────────────────────────────
     document.getElementById("header-name").textContent = user.actual_name;
 
-    var badgeEl = document.getElementById("header-badge");
+    var badgeEl    = document.getElementById("header-badge");
     var badgeClass = "role-badge ";
-    if (user.role === "SuperAdmin") badgeClass += "badge-superadmin";
-    else if (user.role === "Admin")  badgeClass += "badge-admin";
-    else                             badgeClass += "badge-viewer";
+    if      (user.role === "SuperAdmin") badgeClass += "badge-superadmin";
+    else if (user.role === "Admin")      badgeClass += "badge-admin";
+    else                                 badgeClass += "badge-viewer";
     badgeEl.innerHTML = '<span class="' + badgeClass + '">' + user.role.toUpperCase() + '</span>';
 
     // ── Fill in welcome card ──────────────────────────────────
@@ -322,7 +373,7 @@
     if (user.permissions && user.permissions.length > 0) {
         permList.innerHTML = "";
         user.permissions.forEach(function(perm) {
-            var tag = document.createElement("span");
+            var tag       = document.createElement("span");
             tag.className = "permission-tag";
             tag.textContent = perm;
             permList.appendChild(tag);
@@ -334,6 +385,7 @@
     // ── Show the right section based on role ─────────────────
     if (user.role === "SuperAdmin") {
         document.getElementById("superadmin-section").style.display = "block";
+        loadVersionInfo();        // Phase 5 — only SuperAdmin sees this
         loadAllUsers("superadmin");
 
     } else if (user.role === "Admin") {
@@ -345,10 +397,59 @@
     }
 
 
-    // ── loadAllUsers ─────────────────────────────────────────
-    // Fetches all users from /users route in Server.js
-    // SuperAdmin gets role-change dropdown, Admin gets read-only
+    // ── loadVersionInfo (Phase 5) ────────────────────────────
+    // Calls /version route and displays Node.js + MariaDB versions
+    // Shows a warning badge if version is below the minimum
     // ─────────────────────────────────────────────────────────
+    function loadVersionInfo() {
+
+        fetch("/version")
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+
+                if (!data.success) {
+                    document.getElementById("version-grid").innerHTML =
+                        '<span style="color:#ef4444">Could not fetch version info: ' + data.message + '</span>';
+                    return;
+                }
+
+                var grid = document.getElementById("version-grid");
+
+                // Build Node.js version card
+                var nodeCard = document.createElement("div");
+                nodeCard.className = "version-card" + (data.node.hasWarning ? " warning" : "");
+                nodeCard.innerHTML =
+                    '<div class="version-label">Node.js Version</div>' +
+                    '<div class="version-number">' + data.node.version + '</div>' +
+                    '<div class="version-minimum">Minimum required: ' + data.node.minimum + '</div>' +
+                    (data.node.hasWarning
+                        ? '<div class="version-warning">⚠ Version too old — please update</div>'
+                        : '<div class="version-ok">✓ Version is up to date</div>');
+
+                // Build MariaDB version card
+                var mariaCard = document.createElement("div");
+                mariaCard.className = "version-card" + (data.mariadb.hasWarning ? " warning" : "");
+                mariaCard.innerHTML =
+                    '<div class="version-label">MariaDB Version</div>' +
+                    '<div class="version-number">' + data.mariadb.version + '</div>' +
+                    '<div class="version-minimum">Minimum required: ' + data.mariadb.minimum + '</div>' +
+                    (data.mariadb.hasWarning
+                        ? '<div class="version-warning">⚠ Version too old — please update</div>'
+                        : '<div class="version-ok">✓ Version is up to date</div>');
+
+                // Clear loading text and add the two cards
+                grid.innerHTML = "";
+                grid.appendChild(nodeCard);
+                grid.appendChild(mariaCard);
+            })
+            .catch(function() {
+                document.getElementById("version-grid").innerHTML =
+                    '<span style="color:#ef4444">Could not reach server.</span>';
+            });
+    }
+
+
+    // ── loadAllUsers ─────────────────────────────────────────
     function loadAllUsers(viewerRole) {
 
         fetch("/users")
@@ -356,60 +457,55 @@
             .then(function(data) {
 
                 if (!data.success) {
-                    showError(viewerRole, "Could not load users: " + data.message);
+                    showTableError(viewerRole, "Could not load users: " + data.message);
                     return;
                 }
 
-                var users = data.users;
+                var users       = data.users;
                 var containerId = viewerRole === "superadmin" ? "users-table-container" : "admin-users-container";
-                var container = document.getElementById(containerId);
+                var container   = document.getElementById(containerId);
 
-                // Build the table
-                var html = '<table>';
-                html += '<thead><tr>';
-                html += '<th>Name</th><th>Username</th><th>Email</th><th>Role</th>';
-                if (viewerRole === "superadmin") html += '<th>Change Role</th>';
-                html += '</tr></thead><tbody>';
+                var html = "<table><thead><tr>";
+                html += "<th>Name</th><th>Username</th><th>Email</th><th>Role</th>";
+                if (viewerRole === "superadmin") html += "<th>Change Role</th>";
+                html += "</tr></thead><tbody>";
 
                 users.forEach(function(u) {
-                    html += '<tr>';
-                    html += '<td>' + u.actual_name + '</td>';
-                    html += '<td>' + u.username + '</td>';
-                    html += '<td>' + (u.email || '—') + '</td>';
-                    html += '<td>' + (u.role_name || 'No Role') + '</td>';
+                    html += "<tr>";
+                    html += "<td>" + u.actual_name + "</td>";
+                    html += "<td>" + u.username + "</td>";
+                    html += "<td>" + (u.email || "—") + "</td>";
+                    html += "<td>" + (u.role_name || "No Role") + "</td>";
 
-                    // SuperAdmin gets a dropdown to change roles
                     if (viewerRole === "superadmin") {
-                        html += '<td>';
+                        html += "<td>";
                         html += '<select id="role-select-' + u.user_id + '">';
-                        html += '<option value="1"' + (u.role_name === "SuperAdmin" ? " selected" : "") + '>SuperAdmin</option>';
-                        html += '<option value="2"' + (u.role_name === "Admin"      ? " selected" : "") + '>Admin</option>';
-                        html += '<option value="3"' + (u.role_name === "Viewer"     ? " selected" : "") + '>Viewer</option>';
-                        html += '</select>';
+                        html += '<option value="1"' + (u.role_name === "SuperAdmin" ? " selected" : "") + ">SuperAdmin</option>";
+                        html += '<option value="2"' + (u.role_name === "Admin"      ? " selected" : "") + ">Admin</option>";
+                        html += '<option value="3"' + (u.role_name === "Viewer"     ? " selected" : "") + ">Viewer</option>";
+                        html += "</select>";
                         html += '<button class="change-btn" onclick="changeRole(' + u.user_id + ')">Save</button>';
-                        html += '</td>';
+                        html += "</td>";
                     }
 
-                    html += '</tr>';
+                    html += "</tr>";
                 });
 
-                html += '</tbody></table>';
+                html += "</tbody></table>";
                 container.innerHTML = html;
             })
-            .catch(function(err) {
-                showError(viewerRole, "Could not reach server.");
+            .catch(function() {
+                showTableError(viewerRole, "Could not reach server.");
             });
     }
 
-    function showError(viewerRole, msg) {
+    function showTableError(viewerRole, msg) {
         var id = viewerRole === "superadmin" ? "users-table-container" : "admin-users-container";
         document.getElementById(id).innerHTML = '<span style="color:#ef4444">' + msg + '</span>';
     }
 
 
     // ── changeRole ───────────────────────────────────────────
-    // SuperAdmin only: sends new role for a user to /changerole
-    // ─────────────────────────────────────────────────────────
     function changeRole(userId) {
 
         var select  = document.getElementById("role-select-" + userId);
@@ -424,7 +520,7 @@
             .then(function(data) {
                 if (data.success) {
                     showToast("Role updated successfully!");
-                    loadAllUsers("superadmin"); // Refresh the table
+                    loadAllUsers("superadmin");
                 } else {
                     showToast("Error: " + data.message);
                 }
@@ -443,10 +539,8 @@
 
 
     // ── showToast ─────────────────────────────────────────────
-    // Shows a small notification at the bottom right of screen
-    // ─────────────────────────────────────────────────────────
     function showToast(msg) {
-        var toast = document.getElementById("toast");
+        var toast       = document.getElementById("toast");
         toast.textContent = msg;
         toast.style.display = "block";
         setTimeout(function() { toast.style.display = "none"; }, 3000);
