@@ -8,6 +8,7 @@
 //   POST /login       — login, returns role + permissions
 //   GET  /users       — fetch all users with roles (SuperAdmin/Admin)
 //   POST /changerole  — update a user's role (SuperAdmin only)
+//   GET  /version     — fetch Node.js + MariaDB version (SuperAdmin only)
 //   GET  /test        — check if server is running
 // ============================================================
 
@@ -55,7 +56,6 @@ app.post("/register", function (req, res) {
         return res.json({ success: false, message: "All fields are required." });
     }
 
-    // Check if username already exists
     const checkQuery = "SELECT * FROM users WHERE username = ?";
     db.query(checkQuery, [username], function (err, results) {
 
@@ -65,15 +65,13 @@ app.post("/register", function (req, res) {
             return res.json({ success: false, message: "Username already taken. Try another one." });
         }
 
-        // Insert new user
         const insertQuery = "INSERT INTO users (actual_name, username, password_hash, email, is_active) VALUES (?, ?, ?, ?, 1)";
         db.query(insertQuery, [actual_name, username, password, email], function (err2, result) {
 
             if (err2) return res.json({ success: false, message: "Could not save user: " + err2.message });
 
-            // Assign Viewer role (role_id = 3) by default
-            const newUserId   = result.insertId;
-            const roleQuery   = "INSERT INTO user_roles (user_id, role_id) VALUES (?, 3)";
+            const newUserId = result.insertId;
+            const roleQuery = "INSERT INTO user_roles (user_id, role_id) VALUES (?, 3)";
             db.query(roleQuery, [newUserId], function (err3) {
 
                 if (err3) return res.json({ success: false, message: "User created but could not assign role: " + err3.message });
@@ -98,7 +96,6 @@ app.post("/login", function (req, res) {
         return res.json({ success: false, message: "Please enter both username and password." });
     }
 
-    // Step A: Check credentials
     const loginQuery = "SELECT * FROM users WHERE username = ? AND password_hash = ? AND is_active = 1";
     db.query(loginQuery, [username, password], function (err, results) {
 
@@ -110,7 +107,6 @@ app.post("/login", function (req, res) {
 
         const user = results[0];
 
-        // Step B: Fetch the user's role
         const roleQuery = `
             SELECT roles.role_id, roles.role_name 
             FROM user_roles 
@@ -124,7 +120,6 @@ app.post("/login", function (req, res) {
             const roleName = roleResults.length > 0 ? roleResults[0].role_name : "Viewer";
             const roleId   = roleResults.length > 0 ? roleResults[0].role_id   : 3;
 
-            // Step C: Fetch permissions for this role
             const permissionsQuery = `
                 SELECT permissions.permission_name 
                 FROM role_permissions 
@@ -135,12 +130,10 @@ app.post("/login", function (req, res) {
 
                 if (err3) return res.json({ success: false, message: "Login ok but could not fetch permissions: " + err3.message });
 
-                // Convert to a simple array of names
                 const permissionsList = permissionResults.map(function (row) {
                     return row.permission_name;
                 });
 
-                // Step D: Send everything back
                 res.json({
                     success: true,
                     message: "Login successful!",
@@ -161,7 +154,6 @@ app.post("/login", function (req, res) {
 // ============================================================
 // Route 3: GET /users
 // Returns all users with their assigned role name
-// Used by SuperAdmin and Admin dashboards
 // ============================================================
 app.get("/users", function (req, res) {
 
@@ -173,8 +165,8 @@ app.get("/users", function (req, res) {
             users.email,
             roles.role_name
         FROM users
-        LEFT JOIN user_roles  ON users.user_id   = user_roles.user_id
-        LEFT JOIN roles       ON user_roles.role_id = roles.role_id
+        LEFT JOIN user_roles ON users.user_id    = user_roles.user_id
+        LEFT JOIN roles      ON user_roles.role_id = roles.role_id
         ORDER BY users.created_at DESC
     `;
 
@@ -189,8 +181,7 @@ app.get("/users", function (req, res) {
 
 // ============================================================
 // Route 4: POST /changerole
-// Updates a user's role in user_roles table
-// Only SuperAdmin should call this (enforced on frontend)
+// Updates a user's role — called by SuperAdmin dashboard
 // Body: { user_id: 5, role_id: 2 }
 // ============================================================
 app.post("/changerole", function (req, res) {
@@ -202,22 +193,18 @@ app.post("/changerole", function (req, res) {
         return res.json({ success: false, message: "user_id and role_id are required." });
     }
 
-    // Update the role in user_roles table
-    // If the user already has a role, update it. If not, insert a new row.
     const checkQuery = "SELECT * FROM user_roles WHERE user_id = ?";
     db.query(checkQuery, [userId], function (err, results) {
 
         if (err) return res.json({ success: false, message: "Database error: " + err.message });
 
         if (results.length > 0) {
-            // User already has a role — update it
             const updateQuery = "UPDATE user_roles SET role_id = ? WHERE user_id = ?";
             db.query(updateQuery, [roleId, userId], function (err2) {
                 if (err2) return res.json({ success: false, message: "Could not update role: " + err2.message });
                 res.json({ success: true, message: "Role updated successfully." });
             });
         } else {
-            // No role yet — insert new row
             const insertQuery = "INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)";
             db.query(insertQuery, [userId, roleId], function (err2) {
                 if (err2) return res.json({ success: false, message: "Could not assign role: " + err2.message });
@@ -229,7 +216,74 @@ app.post("/changerole", function (req, res) {
 
 
 // ============================================================
-// Route 5: GET /test
+// Route 5: GET /version   ← NEW FOR PHASE 5
+//
+// What it does:
+//   - Gets the Node.js version directly from Node itself
+//   - Runs SELECT VERSION() in MariaDB to get the DB version
+//   - Sends both back as JSON
+//   - Also checks if versions meet the minimum required
+//
+// Minimum versions we defined for this project:
+//   Node.js  → 16.0.0
+//   MariaDB  → 10.5.0
+// ============================================================
+app.get("/version", function (req, res) {
+
+    // Get Node.js version — built into Node, no query needed
+    const nodeVersion = process.version;  // Example: "v20.11.0"
+
+    // Define minimum versions for the warning check
+    const minNodeVersion   = "16.0.0";
+    const minMariaVersion  = "10.5.0";
+
+    // Run SELECT VERSION() in MariaDB to get the database version
+    db.query("SELECT VERSION() AS db_version", function (err, results) {
+
+        if (err) {
+            return res.json({ success: false, message: "Could not fetch MariaDB version: " + err.message });
+        }
+
+        const mariaVersion = results[0].db_version;  // Example: "10.11.2-MariaDB"
+
+        // Simple version check function
+        // Strips the "v" prefix and any extra text like "-MariaDB"
+        // Then compares major.minor.patch numbers
+        function isBelowMinimum(current, minimum) {
+            var cleanCurrent = current.replace("v", "").split("-")[0];  // "20.11.0"
+            var curr = cleanCurrent.split(".").map(Number);             // [20, 11, 0]
+            var min  = minimum.split(".").map(Number);                  // [16, 0, 0]
+
+            for (var i = 0; i < 3; i++) {
+                if (curr[i] > min[i]) return false;   // current is higher — OK
+                if (curr[i] < min[i]) return true;    // current is lower  — WARNING
+            }
+            return false;  // exactly equal — OK
+        }
+
+        const nodeWarning  = isBelowMinimum(nodeVersion,  minNodeVersion);
+        const mariaWarning = isBelowMinimum(mariaVersion, minMariaVersion);
+
+        // Send everything back to the dashboard
+        res.json({
+            success: true,
+            node: {
+                version:    nodeVersion,
+                minimum:    "v" + minNodeVersion,
+                hasWarning: nodeWarning,
+            },
+            mariadb: {
+                version:    mariaVersion,
+                minimum:    minMariaVersion,
+                hasWarning: mariaWarning,
+            }
+        });
+    });
+});
+
+
+// ============================================================
+// Route 6: GET /test
 // Open http://localhost:3000/test to confirm server is running
 // ============================================================
 app.get("/test", function (req, res) {
