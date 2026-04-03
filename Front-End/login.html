@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Login — CSE250 RBAC System</title>
+    <title>Login — CipherShield</title>
     <style>
 
-        /* ── Reset ── */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* ── Page background ── */
         body {
             background-color: #020101;
             min-height: 100vh;
@@ -21,13 +19,45 @@
             color: #f0f0f0;
         }
 
-        /* ── Top label ── */
-        .top-label {
-            font-size: 12px;
-            letter-spacing: 3px;
+        /* ── Card entrance animation ──
+           The card fades in and slides up slightly when the page loads.
+           This makes the page feel polished and professional. */
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── CipherShield company name at the top ──
+           Styled in orange with a subtle glow to make it stand out
+           while staying within the dark/orange color theme. */
+        .company-name {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            color: #888888;
-            margin-bottom: 24px;
+            color: #b7410e;
+            /* Orange text glow effect */
+            text-shadow:
+                    0 0 10px rgba(183, 65, 14, 0.8),
+                    0 0 20px rgba(183, 65, 14, 0.4);
+            margin-bottom: 4px;
+            animation: cardEntrance 0.6s ease both;
+        }
+
+        /* ── CipherShield tagline ── */
+        .company-tagline {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #555555;
+            margin-bottom: 28px;
+            animation: cardEntrance 0.6s ease 0.1s both;
         }
 
         /* ── The glowing card ── */
@@ -37,14 +67,22 @@
             border-radius: 14px;
             padding: 40px 36px;
             width: 380px;
-            /* Orange glow effect */
             box-shadow:
                     0 0 30px rgba(183, 65, 14, 0.25),
                     0 0 80px rgba(183, 65, 14, 0.10),
                     0 0 2px  rgba(183, 65, 14, 0.40);
+            /* Card slides up on load */
+            animation: cardEntrance 0.6s ease 0.15s both;
         }
 
-        /* ── Card title ── */
+        /* ── Orange accent line at top of card ── */
+        .card-top-bar {
+            height: 3px;
+            background: linear-gradient(90deg, #b7410e, transparent);
+            border-radius: 14px 14px 0 0;
+            margin: -40px -36px 32px -36px;
+        }
+
         .card h1 {
             font-size: 22px;
             font-weight: bold;
@@ -57,7 +95,6 @@
             margin-bottom: 32px;
         }
 
-        /* ── Form labels ── */
         label {
             display: block;
             font-size: 13px;
@@ -65,7 +102,12 @@
             margin-bottom: 6px;
         }
 
-        /* ── Input fields ── */
+        /* ── Input wrapper — needed for the eye toggle button ── */
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
         input {
             width: 100%;
             background: #1a1a1a;
@@ -74,13 +116,33 @@
             padding: 11px 14px;
             font-size: 14px;
             color: #f0f0f0;
-            margin-bottom: 20px;
             outline: none;
             transition: border-color 0.2s;
         }
-        input:focus {
-            border-color: #b7410e;
+        /* Extra right padding on password fields so text doesn't overlap the eye button */
+        .input-wrapper input { padding-right: 44px; }
+        input:focus { border-color: #b7410e; }
+
+        /* ── Show / Hide password eye button ──
+           Sits inside the input wrapper, positioned on the right side.
+           Clicking it switches the input between password and text type. */
+        .eye-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #555555;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.2s;
+            /* Prevent the button from accidentally submitting the form */
+            type: button;
         }
+        .eye-btn:hover { color: #b7410e; }
 
         /* ── Login button ── */
         .btn {
@@ -98,6 +160,16 @@
         }
         .btn:hover  { background: #d4501a; }
         .btn:active { transform: scale(0.98); }
+
+        /* ── Trust badge below the button ──
+           Purely cosmetic — makes the page look like a real product. */
+        .trust-badge {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #444444;
+            letter-spacing: 0.5px;
+        }
 
         /* ── Message (success / error) ── */
         .message {
@@ -123,36 +195,53 @@
         }
         .bottom-link a:hover { text-decoration: underline; }
 
-        /* ── Orange accent line at top of card ── */
-        .card-top-bar {
-            height: 3px;
-            background: linear-gradient(90deg, #b7410e, transparent);
-            border-radius: 14px 14px 0 0;
-            margin: -40px -36px 32px -36px;
+        /* ── CSE250 watermark — bottom-right corner ──
+           Very subtle. Not the highlight of the page.
+           Same font style as before, just small and tucked away. */
+        .watermark {
+            position: fixed;
+            bottom: 16px;
+            right: 20px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #2a2a2a;
+            pointer-events: none; /* Can't accidentally click it */
         }
 
     </style>
 </head>
 <body>
 
-<div class="top-label">CSE250 — Database Management Systems</div>
+<!-- ── CipherShield branding ── -->
+<div class="company-name">CipherShield</div>
+<div class="company-tagline">Secure Access. Zero Compromise.</div>
 
 <div class="card">
     <div class="card-top-bar"></div>
 
-    <h1>Welcome Back</h1>
+    <!-- Changed from "Welcome Back" to "Welcome" as requested -->
+    <h1>Welcome</h1>
     <div class="subtitle">Sign in to your account</div>
 
     <!-- Username -->
     <label for="username">Username</label>
-    <input type="text" id="username" placeholder="Enter your username" />
+    <div class="input-wrapper">
+        <input type="text" id="username" placeholder="Enter your username" />
+    </div>
 
-    <!-- Password -->
+    <!-- Password with Show/Hide toggle -->
     <label for="password">Password</label>
-    <input type="password" id="password" placeholder="Enter your password" />
+    <div class="input-wrapper">
+        <input type="password" id="password" placeholder="Enter your password" />
+        <button class="eye-btn" onclick="toggleVisibility('password', this)" tabindex="-1">👁</button>
+    </div>
 
     <!-- Login Button -->
     <button class="btn" onclick="handleLogin()">Login</button>
+
+    <!-- Trust badge -->
+    <div class="trust-badge">🔒 Secured Connection</div>
 
     <!-- Message area -->
     <div class="message" id="message"></div>
@@ -163,13 +252,34 @@
     </div>
 </div>
 
+<!-- CSE250 watermark — bottom-right, very subtle -->
+<div class="watermark">CSE250 — Database Management Systems</div>
+
 
 <script>
 
+    // ── Show / Hide password toggle ────────────────────────────
+    // Switches the input field between "password" (hidden) and
+    // "text" (visible) modes. The button icon changes accordingly.
+    function toggleVisibility(fieldId, btn) {
+        var field = document.getElementById(fieldId);
+        if (field.type === "password") {
+            field.type    = "text";
+            btn.textContent = "🙈";  // Closed eye = now visible
+        } else {
+            field.type    = "password";
+            btn.textContent = "👁";   // Open eye = now hidden
+        }
+    }
+
+
     // ── handleLogin ──────────────────────────────────────────
-    // Sends username + password to /login route in Server.js
-    // If success → save user data and go to dashboard
-    // If fail    → show error message
+    // Smart error messages per field:
+    //   Both empty     → ask for both
+    //   Username only  → ask for username
+    //   Password only  → ask for password
+    //   Both filled but wrong → generic "incorrect" message
+    //   (We NEVER tell the user which specific field is wrong)
     // ─────────────────────────────────────────────────────────
     function handleLogin() {
 
@@ -177,19 +287,29 @@
         var password = document.getElementById("password").value.trim();
         var msgBox   = document.getElementById("message");
 
-        // Basic frontend check
-        if (!username || !password) {
-            msgBox.className = "message error";
-            msgBox.textContent = "Please enter both username and password.";
+        // ── Smart field validation ──
+        if (!username && !password) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Please enter your username and password.";
+            return;
+        }
+        if (!username) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Please enter your username.";
+            return;
+        }
+        if (!password) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Please enter your password.";
             return;
         }
 
-        msgBox.className = "message";
+        msgBox.className  = "message";
         msgBox.textContent = "Logging in...";
 
         // Send login request to our Node.js server
         fetch("/login", {
-            method: "POST",
+            method:  "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username: username, password: password })
         })
@@ -197,25 +317,23 @@
             .then(function(data) {
 
                 if (data.success) {
-                    // Save user info to sessionStorage so dashboard can read it
-                    //save it
                     sessionStorage.setItem("user", JSON.stringify(data.user));
-
-                    msgBox.className = "message success";
+                    msgBox.className  = "message success";
                     msgBox.textContent = "Login successful! Redirecting...";
-
-                    // Go to dashboard after a short delay
                     setTimeout(function() {
                         window.location.href = "dashboard.html";
                     }, 800);
 
                 } else {
-                    msgBox.className = "message error";
-                    msgBox.textContent = data.message;
+                    // IMPORTANT: We always show a generic message here.
+                    // We never tell the user if the username or password
+                    // specifically was wrong — that's a security best practice.
+                    msgBox.className  = "message error";
+                    msgBox.textContent = "Username or Password is incorrect. Please try again.";
                 }
             })
-            .catch(function(err) {
-                msgBox.className = "message error";
+            .catch(function() {
+                msgBox.className  = "message error";
                 msgBox.textContent = "Could not reach server. Is it running?";
             });
     }
