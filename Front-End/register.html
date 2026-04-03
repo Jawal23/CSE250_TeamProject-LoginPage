@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Register — CSE250 RBAC System</title>
+    <title>Register — CipherShield</title>
     <style>
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,12 +20,39 @@
             padding: 40px 0;
         }
 
-        .top-label {
-            font-size: 12px;
-            letter-spacing: 3px;
+        /* ── Card entrance animation ── */
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── CipherShield company name ── */
+        .company-name {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            color: #888888;
-            margin-bottom: 24px;
+            color: #b7410e;
+            text-shadow:
+                    0 0 10px rgba(183, 65, 14, 0.8),
+                    0 0 20px rgba(183, 65, 14, 0.4);
+            margin-bottom: 4px;
+            animation: cardEntrance 0.6s ease both;
+        }
+
+        .company-tagline {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #555555;
+            margin-bottom: 28px;
+            animation: cardEntrance 0.6s ease 0.1s both;
         }
 
         .card {
@@ -38,6 +65,7 @@
                     0 0 30px rgba(183, 65, 14, 0.25),
                     0 0 80px rgba(183, 65, 14, 0.10),
                     0 0 2px  rgba(183, 65, 14, 0.40);
+            animation: cardEntrance 0.6s ease 0.15s both;
         }
 
         .card h1 {
@@ -59,6 +87,12 @@
             margin-bottom: 6px;
         }
 
+        /* ── Input wrapper — needed for eye toggle ── */
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
         input {
             width: 100%;
             background: #1a1a1a;
@@ -67,20 +101,98 @@
             padding: 11px 14px;
             font-size: 14px;
             color: #f0f0f0;
-            margin-bottom: 20px;
             outline: none;
             transition: border-color 0.2s;
         }
+        .input-wrapper input { padding-right: 44px; }
         input:focus { border-color: #b7410e; }
 
-        /* Small helper text under role field */
-        .helper-text {
-            font-size: 11px;
-            color: #555555;
-            margin-top: -14px;
+        /* ── Simple inputs (no eye button) — still need bottom margin ── */
+        .plain-input {
             margin-bottom: 20px;
         }
 
+        /* ── Eye toggle button ── */
+        .eye-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #555555;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .eye-btn:hover { color: #b7410e; }
+
+        /* ── Password Strength Bar ── */
+        .strength-wrapper {
+            margin-top: -14px;
+            margin-bottom: 20px;
+        }
+        .strength-bar-track {
+            height: 4px;
+            background: #2a2a2a;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .strength-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 99px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        .strength-label {
+            font-size: 11px;
+            margin-top: 5px;
+            color: #555555;
+        }
+
+        /* ── Password Rules Checklist ── */
+        .password-rules {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-top: -14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .password-rules p {
+            font-size: 11px;
+            color: #555555;
+            margin-bottom: 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .rule {
+            font-size: 12px;
+            color: #555555;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .rule.passed { color: #22c55e; }
+        .rule-icon { font-size: 11px; width: 14px; text-align: center; }
+
+        /* ── Confirm Password Match Indicator ── */
+        .confirm-status {
+            font-size: 12px;
+            margin-top: -14px;
+            margin-bottom: 20px;
+            min-height: 16px;
+        }
+        .confirm-status.match    { color: #22c55e; }
+        .confirm-status.no-match { color: #ef4444; }
+
+        /* ── Register button ── */
         .btn {
             width: 100%;
             background: #b7410e;
@@ -96,6 +208,15 @@
         }
         .btn:hover  { background: #d4501a; }
         .btn:active { transform: scale(0.98); }
+
+        /* ── Trust badge ── */
+        .trust-badge {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #444444;
+            letter-spacing: 0.5px;
+        }
 
         .message {
             margin-top: 16px;
@@ -126,23 +247,25 @@
             margin: -40px -36px 32px -36px;
         }
 
-        /* Role badge shown after successful register */
-        .role-badge {
-            display: inline-block;
-            background: rgba(183, 65, 14, 0.15);
-            border: 1px solid #b7410e;
-            color: #b7410e;
+        /* ── CSE250 watermark ── */
+        .watermark {
+            position: fixed;
+            bottom: 16px;
+            right: 20px;
             font-size: 11px;
-            padding: 3px 10px;
-            border-radius: 99px;
-            margin-top: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #2a2a2a;
+            pointer-events: none;
         }
 
     </style>
 </head>
 <body>
 
-<div class="top-label">CSE250 — Database Management Systems</div>
+<!-- ── CipherShield branding ── -->
+<div class="company-name">CipherShield</div>
+<div class="company-tagline">Secure Access. Zero Compromise.</div>
 
 <div class="card">
     <div class="card-top-bar"></div>
@@ -150,24 +273,70 @@
     <h1>Create Account</h1>
     <div class="subtitle">All new accounts are assigned the Viewer role</div>
 
-    <!-- Full Name -->
+    <!-- Full Name — plain input, no eye button needed -->
     <label for="actual_name">Full Name</label>
-    <input type="text" id="actual_name" placeholder="Enter your full name" />
+    <input class="plain-input" type="text" id="actual_name" placeholder="Enter your full name" />
 
     <!-- Username -->
     <label for="username">Username</label>
-    <input type="text" id="username" placeholder="Choose a username" />
+    <input class="plain-input" type="text" id="username" placeholder="Choose a username" />
 
     <!-- Email -->
-    <label for="email">Email</label>
-    <input type="email" id="email" placeholder="Enter your email" />
+    <label for="email">Email Address</label>
+    <input class="plain-input" type="email" id="email" placeholder="Enter your email address" />
 
-    <!-- Password -->
-    <label for="password">Password</label>
-    <input type="password" id="password" placeholder="Choose a password" />
+    <!-- Create a Password — with eye toggle + strength checker -->
+    <label for="password">Create a Password</label>
+    <div class="input-wrapper">
+        <input type="password" id="password" placeholder="Create a strong password"
+               oninput="checkPasswordStrength()" />
+        <button class="eye-btn" onclick="toggleVisibility('password', this)" tabindex="-1">👁</button>
+    </div>
+
+    <!-- Strength bar -->
+    <div class="strength-wrapper">
+        <div class="strength-bar-track">
+            <div class="strength-bar-fill" id="strength-bar"></div>
+        </div>
+        <div class="strength-label" id="strength-label">Start typing to check strength</div>
+    </div>
+
+    <!-- Rules checklist — shown while typing -->
+    <div class="password-rules" id="password-rules">
+        <p>Password must have:</p>
+        <div class="rule" id="rule-length">
+            <span class="rule-icon">○</span> At least 12 characters
+        </div>
+        <div class="rule" id="rule-upper">
+            <span class="rule-icon">○</span> At least one uppercase letter (A–Z)
+        </div>
+        <div class="rule" id="rule-lower">
+            <span class="rule-icon">○</span> At least one lowercase letter (a–z)
+        </div>
+        <div class="rule" id="rule-number">
+            <span class="rule-icon">○</span> At least one number (0–9)
+        </div>
+        <div class="rule" id="rule-special">
+            <span class="rule-icon">○</span> At least one special character (!@#$%^&*)
+        </div>
+    </div>
+
+    <!-- Confirm Password — with eye toggle + match indicator -->
+    <label for="confirm_password">Confirm Password</label>
+    <div class="input-wrapper">
+        <input type="password" id="confirm_password" placeholder="Re-enter your password"
+               oninput="checkPasswordMatch()" />
+        <button class="eye-btn" onclick="toggleVisibility('confirm_password', this)" tabindex="-1">👁</button>
+    </div>
+
+    <!-- Match status -->
+    <div class="confirm-status" id="confirm-status"></div>
 
     <!-- Register Button -->
     <button class="btn" onclick="handleRegister()">Create Account</button>
+
+    <!-- Trust badge -->
+    <div class="trust-badge">🔒 Secured Connection</div>
 
     <!-- Message area -->
     <div class="message" id="message"></div>
@@ -178,67 +347,199 @@
     </div>
 </div>
 
+<!-- CSE250 watermark -->
+<div class="watermark">CSE250 — Database Management Systems</div>
+
 
 <script>
 
-    // ── handleRegister ───────────────────────────────────────
-    // Sends form data to /register route in Server.js
-    // If success → show success message + redirect to login
-    // If fail    → show error message
-    // ─────────────────────────────────────────────────────────
-    function handleRegister() {
+    // ── Show / Hide password toggle ────────────────────────────
+    function toggleVisibility(fieldId, btn) {
+        var field = document.getElementById(fieldId);
+        if (field.type === "password") {
+            field.type      = "text";
+            btn.textContent = "🙈";
+        } else {
+            field.type      = "password";
+            btn.textContent = "👁";
+        }
+    }
 
-        var actual_name = document.getElementById("actual_name").value.trim();
-        var username    = document.getElementById("username").value.trim();
-        var email       = document.getElementById("email").value.trim();
-        var password    = document.getElementById("password").value.trim();
-        var msgBox      = document.getElementById("message");
 
-        // Basic frontend check
-        if (!actual_name || !username || !email || !password) {
-            msgBox.className = "message error";
-            msgBox.textContent = "Please fill in all fields.";
+    // ── Password Strength Checker ──────────────────────────────
+    // Based on NIST SP 800-63B and OWASP guidelines.
+    // Weak   = under 8 chars
+    // Medium = 8–11 chars, or missing some rules
+    // Strong = 12+ chars with all 5 rule types satisfied
+    function checkPasswordStrength() {
+
+        var password = document.getElementById("password").value;
+        var bar      = document.getElementById("strength-bar");
+        var label    = document.getElementById("strength-label");
+        var rulesBox = document.getElementById("password-rules");
+
+        if (password.length > 0) {
+            rulesBox.style.display = "block";
+        } else {
+            rulesBox.style.display = "none";
+            bar.style.width        = "0%";
+            label.textContent      = "Start typing to check strength";
+            label.style.color      = "#555555";
             return;
         }
 
-        msgBox.className = "message";
+        var hasLength  = password.length >= 12;
+        var hasUpper   = /[A-Z]/.test(password);
+        var hasLower   = /[a-z]/.test(password);
+        var hasNumber  = /[0-9]/.test(password);
+        var hasSpecial = /[!@#$%^&*(),.?":{}|<>_\-]/.test(password);
+
+        updateRule("rule-length",  hasLength);
+        updateRule("rule-upper",   hasUpper);
+        updateRule("rule-lower",   hasLower);
+        updateRule("rule-number",  hasNumber);
+        updateRule("rule-special", hasSpecial);
+
+        var score = [hasLength, hasUpper, hasLower, hasNumber, hasSpecial]
+            .filter(Boolean).length;
+
+        if (password.length < 8) {
+            setStrength(bar, label, "33%",  "#ef4444", "🔴  Weak — too short");
+        } else if (score <= 3 || password.length < 12) {
+            setStrength(bar, label, "66%",  "#f59e0b", "🟡  Medium — could be stronger");
+        } else {
+            setStrength(bar, label, "100%", "#22c55e", "🟢  Strong — great password!");
+        }
+
+        if (document.getElementById("confirm_password").value.length > 0) {
+            checkPasswordMatch();
+        }
+    }
+
+    function updateRule(ruleId, passed) {
+        var ruleEl = document.getElementById(ruleId);
+        var iconEl = ruleEl.querySelector(".rule-icon");
+        if (passed) {
+            ruleEl.classList.add("passed");
+            iconEl.textContent = "✓";
+        } else {
+            ruleEl.classList.remove("passed");
+            iconEl.textContent = "○";
+        }
+    }
+
+    function setStrength(bar, label, width, color, text) {
+        bar.style.width           = width;
+        bar.style.backgroundColor = color;
+        label.textContent         = text;
+        label.style.color         = color;
+    }
+
+
+    // ── Confirm Password Match Checker ─────────────────────────
+    function checkPasswordMatch() {
+        var password        = document.getElementById("password").value;
+        var confirmPassword = document.getElementById("confirm_password").value;
+        var statusEl        = document.getElementById("confirm-status");
+
+        if (confirmPassword.length === 0) {
+            statusEl.textContent = "";
+            statusEl.className   = "confirm-status";
+            return;
+        }
+
+        if (password === confirmPassword) {
+            statusEl.textContent = "✓ Passwords match";
+            statusEl.className   = "confirm-status match";
+        } else {
+            statusEl.textContent = "✗ Passwords do not match";
+            statusEl.className   = "confirm-status no-match";
+        }
+    }
+
+
+    // ── handleRegister ─────────────────────────────────────────
+    // Smart per-field validation — each empty field gets its own
+    // specific message so the user knows exactly what to fill in.
+    function handleRegister() {
+
+        var actual_name     = document.getElementById("actual_name").value.trim();
+        var username        = document.getElementById("username").value.trim();
+        var email           = document.getElementById("email").value.trim();
+        var password        = document.getElementById("password").value.trim();
+        var confirmPassword = document.getElementById("confirm_password").value.trim();
+        var msgBox          = document.getElementById("message");
+
+        // Check each field individually and show a specific message
+        if (!actual_name) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Please enter your full name.";
+            return;
+        }
+        if (!username) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Please choose a username.";
+            return;
+        }
+        if (!email) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Please enter your email address.";
+            return;
+        }
+        if (!password) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Please create a password.";
+            return;
+        }
+        if (!confirmPassword) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Please confirm your password.";
+            return;
+        }
+        if (password !== confirmPassword) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Passwords do not match. Please check and try again.";
+            return;
+        }
+        if (password.length < 8) {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Your password is too weak. Please choose a stronger password.";
+            return;
+        }
+
+        msgBox.className  = "message";
         msgBox.textContent = "Creating your account...";
 
-        // Send register request to our Node.js server
         fetch("/register", {
-            method: "POST",
+            method:  "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 actual_name: actual_name,
-                username: username,
-                email: email,
-                password: password
+                username:    username,
+                email:       email,
+                password:    password
             })
         })
             .then(function(response) { return response.json(); })
             .then(function(data) {
-
                 if (data.success) {
-                    msgBox.className = "message success";
+                    msgBox.className  = "message success";
                     msgBox.textContent = data.message + " Redirecting to login...";
-
-                    // Go back to login page after short delay
                     setTimeout(function() {
                         window.location.href = "login.html";
                     }, 2000);
-
                 } else {
-                    msgBox.className = "message error";
+                    msgBox.className  = "message error";
                     msgBox.textContent = data.message;
                 }
             })
-            .catch(function(err) {
-                msgBox.className = "message error";
+            .catch(function() {
+                msgBox.className  = "message error";
                 msgBox.textContent = "Could not reach server. Is it running?";
             });
     }
 
-    // Allow pressing Enter key to submit
+    // Allow pressing Enter to submit
     document.addEventListener("keydown", function(e) {
         if (e.key === "Enter") handleRegister();
     });
