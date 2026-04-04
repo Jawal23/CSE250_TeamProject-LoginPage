@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Dashboard — CSE250 RBAC System</title>
+    <title>Dashboard — CipherShield</title>
     <style>
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,17 +24,26 @@
             align-items: center;
             justify-content: space-between;
         }
+
+        /* ── CipherShield name in header ──
+           Styled with orange glow to match the login/register pages. */
         .header-left .app-name {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
             color: #b7410e;
-            letter-spacing: 1px;
+            text-shadow:
+                    0 0 8px rgba(183, 65, 14, 0.7),
+                    0 0 16px rgba(183, 65, 14, 0.3);
         }
-        .header-left .course-label {
+        .header-left .app-subtitle {
             font-size: 11px;
-            color: #555555;
+            color: #444444;
             margin-top: 2px;
+            letter-spacing: 0.5px;
         }
+
         .header-right {
             display: flex;
             align-items: center;
@@ -55,9 +64,9 @@
             letter-spacing: 1px;
             margin-top: 3px;
         }
-        .badge-superadmin { background: rgba(183,65,14,0.2);  border: 1px solid #b7410e;   color: #b7410e; }
-        .badge-admin      { background: rgba(183,65,14,0.1);  border: 1px solid #b7410e88; color: #d4501a; }
-        .badge-viewer     { background: rgba(136,136,136,0.15); border: 1px solid #555;    color: #888888; }
+        .badge-superadmin { background: rgba(183,65,14,0.2);    border: 1px solid #b7410e;   color: #b7410e; }
+        .badge-admin      { background: rgba(183,65,14,0.1);    border: 1px solid #b7410e88; color: #d4501a; }
+        .badge-viewer     { background: rgba(136,136,136,0.15); border: 1px solid #555;      color: #888888; }
 
         .logout-btn {
             background: transparent;
@@ -107,7 +116,7 @@
             border-radius: 6px;
         }
 
-        /* ── Section ── */
+        /* ── Section cards ── */
         .section {
             background: #111111;
             border: 1px solid #222222;
@@ -125,27 +134,22 @@
         }
         .section-title span { color: #b7410e; }
 
-        /* ── Version cards (Phase 5) ── */
+        /* ── Version cards ── */
         .version-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
-            margin-bottom: 0;
         }
-
         .version-card {
             background: #1a1a1a;
             border: 1px solid #333333;
             border-radius: 10px;
             padding: 20px;
         }
-
-        /* If warning, card border turns orange */
         .version-card.warning {
             border-color: #b7410e;
             background: rgba(183, 65, 14, 0.08);
         }
-
         .version-card .version-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -164,8 +168,6 @@
             font-size: 12px;
             color: #555555;
         }
-
-        /* Warning badge shown if version is too old */
         .version-warning {
             display: inline-block;
             background: rgba(183, 65, 14, 0.2);
@@ -176,8 +178,6 @@
             border-radius: 6px;
             margin-top: 8px;
         }
-
-        /* OK badge shown if version is fine */
         .version-ok {
             display: inline-block;
             background: rgba(34, 197, 94, 0.1);
@@ -190,11 +190,7 @@
         }
 
         /* ── Users Table ── */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
         th {
             text-align: left;
             font-size: 11px;
@@ -265,6 +261,18 @@
 
         .loading { color: #555555; font-size: 13px; font-style: italic; }
 
+        /* ── CSE250 watermark — bottom-right corner ── */
+        .watermark {
+            position: fixed;
+            bottom: 16px;
+            right: 20px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #2a2a2a;
+            pointer-events: none;
+        }
+
     </style>
 </head>
 <body>
@@ -272,8 +280,9 @@
 <!-- ── Header ── -->
 <div class="header">
     <div class="header-left">
-        <div class="app-name">RBAC Admin System</div>
-        <div class="course-label">CSE250 — Ahmedabad University</div>
+        <!-- Updated: CipherShield branding with orange glow -->
+        <div class="app-name">CipherShield</div>
+        <div class="app-subtitle">Secure Access. Zero Compromise.</div>
     </div>
     <div class="header-right">
         <div class="user-info">
@@ -300,7 +309,7 @@
     <!-- ── SuperAdmin Section ── -->
     <div id="superadmin-section" style="display:none;">
 
-        <!-- Version Check Card (Phase 5) — SuperAdmin only -->
+        <!-- Version Check Card — SuperAdmin only -->
         <div class="section">
             <div class="section-title">System Version Info <span>— SuperAdmin Only</span></div>
             <div class="version-grid" id="version-grid">
@@ -333,7 +342,8 @@
         <div class="section">
             <div class="section-title">Your Access <span>— Viewer</span></div>
             <div class="info-box">
-                You have <strong>Viewer access</strong>. You can view the dashboard and see the user list. To get more permissions, contact your SuperAdmin.
+                You have <strong>Viewer access</strong>. You can view the dashboard and see the user list.
+                To get more permissions, contact your CipherShield administrator.
             </div>
         </div>
     </div>
@@ -342,6 +352,9 @@
 
 <!-- Toast notification -->
 <div id="toast"></div>
+
+<!-- CSE250 watermark — bottom-right, very subtle -->
+<div class="watermark">CSE250 — Database Management Systems</div>
 
 
 <script>
@@ -382,10 +395,10 @@
         permList.innerHTML = '<span class="loading">No permissions found.</span>';
     }
 
-    // ── Show the right section based on role ─────────────────
+    // ── Show the right section based on role ──────────────────
     if (user.role === "SuperAdmin") {
         document.getElementById("superadmin-section").style.display = "block";
-        loadVersionInfo();        // Phase 5 — only SuperAdmin sees this
+        loadVersionInfo();
         loadAllUsers("superadmin");
 
     } else if (user.role === "Admin") {
@@ -397,12 +410,8 @@
     }
 
 
-    // ── loadVersionInfo (Phase 5) ────────────────────────────
-    // Calls /version route and displays Node.js + MariaDB versions
-    // Shows a warning badge if version is below the minimum
-    // ─────────────────────────────────────────────────────────
+    // ── loadVersionInfo ───────────────────────────────────────
     function loadVersionInfo() {
-
         fetch("/version")
             .then(function(res) { return res.json(); })
             .then(function(data) {
@@ -415,7 +424,6 @@
 
                 var grid = document.getElementById("version-grid");
 
-                // Build Node.js version card
                 var nodeCard = document.createElement("div");
                 nodeCard.className = "version-card" + (data.node.hasWarning ? " warning" : "");
                 nodeCard.innerHTML =
@@ -426,7 +434,6 @@
                         ? '<div class="version-warning">⚠ Version too old — please update</div>'
                         : '<div class="version-ok">✓ Version is up to date</div>');
 
-                // Build MariaDB version card
                 var mariaCard = document.createElement("div");
                 mariaCard.className = "version-card" + (data.mariadb.hasWarning ? " warning" : "");
                 mariaCard.innerHTML =
@@ -437,7 +444,6 @@
                         ? '<div class="version-warning">⚠ Version too old — please update</div>'
                         : '<div class="version-ok">✓ Version is up to date</div>');
 
-                // Clear loading text and add the two cards
                 grid.innerHTML = "";
                 grid.appendChild(nodeCard);
                 grid.appendChild(mariaCard);
@@ -449,9 +455,8 @@
     }
 
 
-    // ── loadAllUsers ─────────────────────────────────────────
+    // ── loadAllUsers ──────────────────────────────────────────
     function loadAllUsers(viewerRole) {
-
         fetch("/users")
             .then(function(res) { return res.json(); })
             .then(function(data) {
@@ -505,14 +510,13 @@
     }
 
 
-    // ── changeRole ───────────────────────────────────────────
+    // ── changeRole ────────────────────────────────────────────
     function changeRole(userId) {
-
         var select  = document.getElementById("role-select-" + userId);
         var newRole = select.value;
 
         fetch("/changerole", {
-            method: "POST",
+            method:  "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ user_id: userId, role_id: newRole })
         })
@@ -540,7 +544,7 @@
 
     // ── showToast ─────────────────────────────────────────────
     function showToast(msg) {
-        var toast       = document.getElementById("toast");
+        var toast         = document.getElementById("toast");
         toast.textContent = msg;
         toast.style.display = "block";
         setTimeout(function() { toast.style.display = "none"; }, 3000);
