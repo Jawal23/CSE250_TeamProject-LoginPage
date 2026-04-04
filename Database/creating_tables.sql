@@ -46,4 +46,20 @@ CREATE TABLE user_roles
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
 
+CREATE TABLE messages
+(
+    message_id   INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id    INT NOT NULL,
+    sender_role  VARCHAR(20) NOT NULL,
+    target_role  VARCHAR(20) NOT NULL,
+    subject      VARCHAR(255) NOT NULL,
+    message_body TEXT NOT NULL,
+    reply        TEXT DEFAULT NULL,
+    replied_by   INT DEFAULT NULL,
+    is_read      TINYINT DEFAULT 0,
+    sent_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id)  REFERENCES users(user_id),
+    FOREIGN KEY (replied_by) REFERENCES users(user_id)
+);
+
 SHOW TABLES;
