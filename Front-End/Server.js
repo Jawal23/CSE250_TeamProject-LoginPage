@@ -4,14 +4,14 @@
 // File: Server.js
 //
 // ROUTES IN THIS FILE:
-//   POST /register    — new user signup
-//   POST /login       — login, returns role + permissions
+//   POST /register    — new user signup (password is hashed with bcrypt)
+//   POST /login       — login (bcrypt compares password to stored hash)
 //   GET  /users       — fetch all users with roles (SuperAdmin/Admin)
 //   POST /changerole  — update a user's role (SuperAdmin only)
 //   GET  /version     — fetch Node.js + MariaDB version (SuperAdmin only)
 //   GET  /test        — check if server is running
 //
-//   ── Phase 8 routes (new) ──
+//   ── Phase 8 routes ──
 //   GET  /stats       — returns total users, count per role, total permissions
 //   POST /sendmessage — Viewer or Admin sends a message
 //   GET  /inbox       — fetches inbox messages based on role
@@ -20,12 +20,18 @@
 
 const express = require("express");
 const mysql   = require("mysql2");
+const bcrypt  = require("bcrypt");       // ← Phase 7 (7o): added for password hashing
 const path    = require("path");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
+
+// ── How many rounds bcrypt uses to scramble the password ──
+// 10 is the standard — secure but not too slow.
+// Higher = more secure but slower. Don't go above 12 for a local project.
+const SALT_ROUNDS = 10;
 
 
 // ============================================================
@@ -49,7 +55,12 @@ db.connect(function (err) {
 
 // ============================================================
 // Route 1: POST /register
-// Saves a new user into the users table with Viewer role
+//
+// CHANGE from before:
+//   Old: stored the password directly as plain text
+//   New: bcrypt.hash() scrambles the password first, THEN we
+//        store the scrambled version (the hash) in the database.
+//        The real password is never saved anywhere.
 // ============================================================
 app.post("/register", function (req, res) {
 
@@ -62,6 +73,7 @@ app.post("/register", function (req, res) {
         return res.json({ success: false, message: "All fields are required." });
     }
 
+    // Check if username is already taken
     const checkQuery = "SELECT * FROM users WHERE username = ?";
     db.query(checkQuery, [username], function (err, results) {
 
@@ -71,18 +83,32 @@ app.post("/register", function (req, res) {
             return res.json({ success: false, message: "Username already taken. Try another one." });
         }
 
-        const insertQuery = "INSERT INTO users (actual_name, username, password_hash, email, is_active) VALUES (?, ?, ?, ?, 1)";
-        db.query(insertQuery, [actual_name, username, password, email], function (err2, result) {
+        // ── bcrypt: hash the password before saving ──────────────
+        // bcrypt.hash(password, SALT_ROUNDS, callback)
+        //   - Takes the plain text password the user typed
+        //   - Scrambles it into a long random-looking string
+        //   - Calls our function with the result (hashedPassword)
+        // We then save hashedPassword into the database instead
+        // of the real password. Even if someone steals the DB,
+        // they cannot figure out what the original password was.
+        bcrypt.hash(password, SALT_ROUNDS, function (err2, hashedPassword) {
 
-            if (err2) return res.json({ success: false, message: "Could not save user: " + err2.message });
+            if (err2) return res.json({ success: false, message: "Could not hash password: " + err2.message });
 
-            const newUserId = result.insertId;
-            const roleQuery = "INSERT INTO user_roles (user_id, role_id) VALUES (?, 3)";
-            db.query(roleQuery, [newUserId], function (err3) {
+            // Save the hashed password — NOT the original
+            const insertQuery = "INSERT INTO users (actual_name, username, password_hash, email, is_active) VALUES (?, ?, ?, ?, 1)";
+            db.query(insertQuery, [actual_name, username, hashedPassword, email], function (err3, result) {
 
-                if (err3) return res.json({ success: false, message: "User created but could not assign role: " + err3.message });
+                if (err3) return res.json({ success: false, message: "Could not save user: " + err3.message });
 
-                res.json({ success: true, message: "Account created successfully! You can now login." });
+                const newUserId = result.insertId;
+                const roleQuery = "INSERT INTO user_roles (user_id, role_id) VALUES (?, 3)";
+                db.query(roleQuery, [newUserId], function (err4) {
+
+                    if (err4) return res.json({ success: false, message: "User created but could not assign role: " + err4.message });
+
+                    res.json({ success: true, message: "Account created successfully! You can now login." });
+                });
             });
         });
     });
@@ -91,7 +117,15 @@ app.post("/register", function (req, res) {
 
 // ============================================================
 // Route 2: POST /login
-// Checks username + password, returns role + permissions
+//
+// CHANGE from before:
+//   Old: searched the DB with WHERE password_hash = ? (plain text match)
+//   New: we search by username only, then use bcrypt.compare() to
+//        check if the typed password matches the stored hash.
+//
+//        bcrypt.compare() does NOT decrypt the hash.
+//        It re-scrambles the typed password the same way and checks
+//        if the result matches. It returns true or false.
 // ============================================================
 app.post("/login", function (req, res) {
 
@@ -102,55 +136,76 @@ app.post("/login", function (req, res) {
         return res.json({ success: false, message: "Please enter both username and password." });
     }
 
-    const loginQuery = "SELECT * FROM users WHERE username = ? AND password_hash = ? AND is_active = 1";
-    db.query(loginQuery, [username, password], function (err, results) {
+    // ── Step 1: Find the user by username only ───────────────
+    // We do NOT put the password in this query anymore.
+    // We find the user first, then check the password separately.
+    const loginQuery = "SELECT * FROM users WHERE username = ? AND is_active = 1";
+    db.query(loginQuery, [username], function (err, results) {
 
         if (err) return res.json({ success: false, message: "Database error: " + err.message });
 
+        // Username not found — show generic message (don't say which field is wrong)
         if (results.length === 0) {
-            return res.json({ success: false, message: "Wrong username or password. Please try again." });
+            return res.json({ success: false, message: "Username or Password is incorrect. Please try again." });
         }
 
         const user = results[0];
 
-        const roleQuery = `
-            SELECT roles.role_id, roles.role_name
-            FROM user_roles
-                     JOIN roles ON user_roles.role_id = roles.role_id
-            WHERE user_roles.user_id = ?
-        `;
-        db.query(roleQuery, [user.user_id], function (err2, roleResults) {
+        // ── Step 2: Compare the typed password to the stored hash ──
+        // bcrypt.compare(typedPassword, storedHash, callback)
+        //   - typedPassword: what the user typed in the login form
+        //   - storedHash:    the scrambled string stored in our DB
+        //   - isMatch:       true if they match, false if not
+        bcrypt.compare(password, user.password_hash, function (err2, isMatch) {
 
-            if (err2) return res.json({ success: false, message: "Login ok but could not fetch role: " + err2.message });
+            if (err2) return res.json({ success: false, message: "Error checking password: " + err2.message });
 
-            const roleName = roleResults.length > 0 ? roleResults[0].role_name : "Viewer";
-            const roleId   = roleResults.length > 0 ? roleResults[0].role_id   : 3;
+            // Password is wrong
+            if (!isMatch) {
+                return res.json({ success: false, message: "Username or Password is incorrect. Please try again." });
+            }
 
-            const permissionsQuery = `
-                SELECT permissions.permission_name
-                FROM role_permissions
-                         JOIN permissions ON role_permissions.permission_id = permissions.permission_id
-                WHERE role_permissions.role_id = ?
+            // ── Password is correct — now fetch role ──────────────
+            const roleQuery = `
+                SELECT roles.role_id, roles.role_name
+                FROM user_roles
+                JOIN roles ON user_roles.role_id = roles.role_id
+                WHERE user_roles.user_id = ?
             `;
-            db.query(permissionsQuery, [roleId], function (err3, permissionResults) {
+            db.query(roleQuery, [user.user_id], function (err3, roleResults) {
 
-                if (err3) return res.json({ success: false, message: "Login ok but could not fetch permissions: " + err3.message });
+                if (err3) return res.json({ success: false, message: "Login ok but could not fetch role: " + err3.message });
 
-                const permissionsList = permissionResults.map(function (row) {
-                    return row.permission_name;
-                });
+                const roleName = roleResults.length > 0 ? roleResults[0].role_name : "Viewer";
+                const roleId   = roleResults.length > 0 ? roleResults[0].role_id   : 3;
 
-                res.json({
-                    success: true,
-                    message: "Login successful!",
-                    user: {
-                        user_id:     user.user_id,
-                        actual_name: user.actual_name,
-                        username:    user.username,
-                        email:       user.email,
-                        role:        roleName,
-                        permissions: permissionsList,
-                    }
+                // Fetch permissions for this role
+                const permissionsQuery = `
+                    SELECT permissions.permission_name
+                    FROM role_permissions
+                    JOIN permissions ON role_permissions.permission_id = permissions.permission_id
+                    WHERE role_permissions.role_id = ?
+                `;
+                db.query(permissionsQuery, [roleId], function (err4, permissionResults) {
+
+                    if (err4) return res.json({ success: false, message: "Login ok but could not fetch permissions: " + err4.message });
+
+                    const permissionsList = permissionResults.map(function (row) {
+                        return row.permission_name;
+                    });
+
+                    res.json({
+                        success: true,
+                        message: "Login successful!",
+                        user: {
+                            user_id:     user.user_id,
+                            actual_name: user.actual_name,
+                            username:    user.username,
+                            email:       user.email,
+                            role:        roleName,
+                            permissions: permissionsList,
+                        }
+                    });
                 });
             });
         });
@@ -172,15 +227,13 @@ app.get("/users", function (req, res) {
             users.email,
             roles.role_name
         FROM users
-                 LEFT JOIN user_roles ON users.user_id    = user_roles.user_id
-                 LEFT JOIN roles      ON user_roles.role_id = roles.role_id
+        LEFT JOIN user_roles ON users.user_id    = user_roles.user_id
+        LEFT JOIN roles      ON user_roles.role_id = roles.role_id
         ORDER BY users.created_at DESC
     `;
 
     db.query(query, function (err, results) {
-
         if (err) return res.json({ success: false, message: "Could not fetch users: " + err.message });
-
         res.json({ success: true, users: results });
     });
 });
@@ -224,29 +277,16 @@ app.post("/changerole", function (req, res) {
 
 // ============================================================
 // Route 5: GET /version
-//
-// What it does:
-//   - Gets the Node.js version directly from Node itself
-//   - Runs SELECT VERSION() in MariaDB to get the DB version
-//   - Sends both back as JSON
-//   - Also checks if versions meet the minimum required
-//
-// Minimum versions we defined for this project:
-//   Node.js  → 16.0.0
-//   MariaDB  → 10.5.0
 // ============================================================
 app.get("/version", function (req, res) {
 
-    const nodeVersion = process.version;
-
+    const nodeVersion     = process.version;
     const minNodeVersion  = "16.0.0";
     const minMariaVersion = "10.5.0";
 
     db.query("SELECT VERSION() AS db_version", function (err, results) {
 
-        if (err) {
-            return res.json({ success: false, message: "Could not fetch MariaDB version: " + err.message });
-        }
+        if (err) return res.json({ success: false, message: "Could not fetch MariaDB version: " + err.message });
 
         const mariaVersion = results[0].db_version;
 
@@ -254,7 +294,6 @@ app.get("/version", function (req, res) {
             var cleanCurrent = current.replace("v", "").split("-")[0];
             var curr = cleanCurrent.split(".").map(Number);
             var min  = minimum.split(".").map(Number);
-
             for (var i = 0; i < 3; i++) {
                 if (curr[i] > min[i]) return false;
                 if (curr[i] < min[i]) return true;
@@ -262,20 +301,17 @@ app.get("/version", function (req, res) {
             return false;
         }
 
-        const nodeWarning  = isBelowMinimum(nodeVersion,  minNodeVersion);
-        const mariaWarning = isBelowMinimum(mariaVersion, minMariaVersion);
-
         res.json({
             success: true,
             node: {
                 version:    nodeVersion,
                 minimum:    "v" + minNodeVersion,
-                hasWarning: nodeWarning,
+                hasWarning: isBelowMinimum(nodeVersion, minNodeVersion),
             },
             mariadb: {
                 version:    mariaVersion,
                 minimum:    minMariaVersion,
-                hasWarning: mariaWarning,
+                hasWarning: isBelowMinimum(mariaVersion, minMariaVersion),
             }
         });
     });
@@ -284,7 +320,6 @@ app.get("/version", function (req, res) {
 
 // ============================================================
 // Route 6: GET /test
-// Open http://localhost:3000/test to confirm server is running
 // ============================================================
 app.get("/test", function (req, res) {
     res.json({ message: "Server is running! MariaDB connection is active." });
@@ -298,58 +333,27 @@ app.get("/test", function (req, res) {
 
 // ============================================================
 // Route 7: GET /stats
-//
-// What it does:
-//   Returns a summary of the system for the dashboard:
-//   - Total number of users in the system
-//   - How many users have each role (SuperAdmin / Admin / Viewer)
-//   - Total number of permissions defined in the system
-//
-// Who uses it:
-//   - SuperAdmin sees everything
-//   - Admin sees only the total user count (we filter on the frontend)
-//
-// Example response:
-//   {
-//     success: true,
-//     totalUsers: 12,
-//     totalPermissions: 7,
-//     roleCounts: [
-//       { role_name: "SuperAdmin", count: 1 },
-//       { role_name: "Admin",      count: 3 },
-//       { role_name: "Viewer",     count: 8 }
-//     ]
-//   }
 // ============================================================
 app.get("/stats", function (req, res) {
 
-    // Query 1: Count total users
-    const totalUsersQuery = "SELECT COUNT(*) AS total FROM users";
-
-    // Query 2: Count how many users have each role
-    const roleCountQuery = `
+    const totalUsersQuery       = "SELECT COUNT(*) AS total FROM users";
+    const totalPermissionsQuery = "SELECT COUNT(*) AS total FROM permissions";
+    const roleCountQuery        = `
         SELECT roles.role_name, COUNT(user_roles.user_id) AS count
         FROM roles
         LEFT JOIN user_roles ON roles.role_id = user_roles.role_id
         GROUP BY roles.role_name
     `;
 
-    // Query 3: Count total permissions
-    const totalPermissionsQuery = "SELECT COUNT(*) AS total FROM permissions";
-
-    // Run query 1 first
     db.query(totalUsersQuery, function (err1, userResults) {
         if (err1) return res.json({ success: false, message: "Could not count users: " + err1.message });
 
-        // Run query 2 next
         db.query(roleCountQuery, function (err2, roleResults) {
             if (err2) return res.json({ success: false, message: "Could not count roles: " + err2.message });
 
-            // Run query 3 last
             db.query(totalPermissionsQuery, function (err3, permResults) {
                 if (err3) return res.json({ success: false, message: "Could not count permissions: " + err3.message });
 
-                // Send everything back together
                 res.json({
                     success:          true,
                     totalUsers:       userResults[0].total,
@@ -364,50 +368,30 @@ app.get("/stats", function (req, res) {
 
 // ============================================================
 // Route 8: POST /sendmessage
-//
-// What it does:
-//   Saves a new message into the messages table in MariaDB.
-//
-// Who calls it:
-//   - Viewer sends a support request → target is Admin
-//   - Admin escalates an issue       → target is SuperAdmin
-//
-// What the frontend sends in the request body:
-//   {
-//     sender_id:    5,               ← the logged-in user's ID
-//     sender_role:  "Viewer",        ← "Viewer" or "Admin"
-//     target_role:  "Admin",         ← "Admin" or "SuperAdmin"
-//     subject:      "Login Issue",   ← short title
-//     message_body: "I cannot..."    ← the actual message text
-//   }
 // ============================================================
 app.post("/sendmessage", function (req, res) {
 
-    const sender_id   = req.body.sender_id;
-    const sender_role = req.body.sender_role;
-    const target_role = req.body.target_role;
-    const subject     = req.body.subject;
+    const sender_id    = req.body.sender_id;
+    const sender_role  = req.body.sender_role;
+    const target_role  = req.body.target_role;
+    const subject      = req.body.subject;
     const message_body = req.body.message_body;
 
-    // Make sure all fields were provided
     if (!sender_id || !sender_role || !target_role || !subject || !message_body) {
         return res.json({ success: false, message: "All fields are required." });
     }
 
-    // Only Viewers and Admins are allowed to send messages
     if (sender_role !== "Viewer" && sender_role !== "Admin") {
         return res.json({ success: false, message: "Only Viewers and Admins can send messages." });
     }
 
-    // Insert the message into the database
     const insertQuery = `
         INSERT INTO messages (sender_id, sender_role, target_role, subject, message_body)
         VALUES (?, ?, ?, ?, ?)
     `;
 
-    db.query(insertQuery, [sender_id, sender_role, target_role, subject, message_body], function (err, result) {
+    db.query(insertQuery, [sender_id, sender_role, target_role, subject, message_body], function (err) {
         if (err) return res.json({ success: false, message: "Could not send message: " + err.message });
-
         res.json({ success: true, message: "Message sent successfully." });
     });
 });
@@ -415,39 +399,17 @@ app.post("/sendmessage", function (req, res) {
 
 // ============================================================
 // Route 9: GET /inbox
-//
-// What it does:
-//   Fetches messages from the database based on who is asking.
-//
-// Who gets what:
-//   - Viewer    → sees only their OWN sent messages + replies
-//                 (so they can check if admin replied to them)
-//   - Admin     → sees all messages sent TO Admin
-//                 (i.e., Viewer support requests)
-//   - SuperAdmin → sees ALL messages in the system
-//                 (both Viewer requests and Admin escalations)
-//
-// How the frontend calls this route:
-//   /inbox?role=Viewer&user_id=5
-//   /inbox?role=Admin
-//   /inbox?role=SuperAdmin
-//
-// The result also includes the sender's actual name (from the users table)
-// so the inbox can show "From: John" instead of just "From: user_id 5"
 // ============================================================
 app.get("/inbox", function (req, res) {
 
     const role    = req.query.role;
     const user_id = req.query.user_id;
 
-    var inboxQuery = "";
+    var inboxQuery  = "";
     var queryParams = [];
 
     if (role === "Viewer") {
-        // Viewer: fetch only messages they personally sent
-        if (!user_id) {
-            return res.json({ success: false, message: "user_id is required for Viewer inbox." });
-        }
+        if (!user_id) return res.json({ success: false, message: "user_id is required for Viewer inbox." });
         inboxQuery = `
             SELECT messages.*, users.actual_name AS sender_name
             FROM messages
@@ -458,7 +420,6 @@ app.get("/inbox", function (req, res) {
         queryParams = [user_id];
 
     } else if (role === "Admin") {
-        // Admin: fetch all messages where the target is Admin
         inboxQuery = `
             SELECT messages.*, users.actual_name AS sender_name
             FROM messages
@@ -468,7 +429,6 @@ app.get("/inbox", function (req, res) {
         `;
 
     } else if (role === "SuperAdmin") {
-        // SuperAdmin: fetch ALL messages in the system
         inboxQuery = `
             SELECT messages.*, users.actual_name AS sender_name
             FROM messages
@@ -477,12 +437,11 @@ app.get("/inbox", function (req, res) {
         `;
 
     } else {
-        return res.json({ success: false, message: "Invalid role. Use Viewer, Admin, or SuperAdmin." });
+        return res.json({ success: false, message: "Invalid role." });
     }
 
     db.query(inboxQuery, queryParams, function (err, results) {
         if (err) return res.json({ success: false, message: "Could not fetch inbox: " + err.message });
-
         res.json({ success: true, messages: results });
     });
 });
@@ -490,21 +449,6 @@ app.get("/inbox", function (req, res) {
 
 // ============================================================
 // Route 10: POST /reply
-//
-// What it does:
-//   Saves a reply to an existing message.
-//   Updates the row in the messages table with the reply text.
-//
-// Who calls it:
-//   - Admin replies to a Viewer's support request
-//   - SuperAdmin replies to a Viewer request or an Admin escalation
-//
-// What the frontend sends:
-//   {
-//     message_id:  3,                 ← which message to reply to
-//     reply:       "We fixed it!",    ← the reply text
-//     replied_by:  2                  ← user_id of whoever is replying
-//   }
 // ============================================================
 app.post("/reply", function (req, res) {
 
@@ -512,13 +456,10 @@ app.post("/reply", function (req, res) {
     const reply      = req.body.reply;
     const replied_by = req.body.replied_by;
 
-    // Make sure all fields were provided
     if (!message_id || !reply || !replied_by) {
         return res.json({ success: false, message: "message_id, reply, and replied_by are required." });
     }
 
-    // Update the message row with the reply
-    // We also set is_read = 1 so the sender knows it was seen and answered
     const updateQuery = `
         UPDATE messages
         SET reply      = ?,
@@ -530,9 +471,8 @@ app.post("/reply", function (req, res) {
     db.query(updateQuery, [reply, replied_by, message_id], function (err, result) {
         if (err) return res.json({ success: false, message: "Could not save reply: " + err.message });
 
-        // result.affectedRows tells us if any row was actually updated
         if (result.affectedRows === 0) {
-            return res.json({ success: false, message: "Message not found. Nothing was updated." });
+            return res.json({ success: false, message: "Message not found." });
         }
 
         res.json({ success: true, message: "Reply saved successfully." });
