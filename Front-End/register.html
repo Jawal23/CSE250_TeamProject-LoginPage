@@ -20,19 +20,11 @@
             padding: 40px 0;
         }
 
-        /* ── Card entrance animation ── */
         @keyframes cardEntrance {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── CipherShield company name ── */
         .company-name {
             font-size: 26px;
             font-weight: bold;
@@ -87,7 +79,6 @@
             margin-bottom: 6px;
         }
 
-        /* ── Input wrapper — needed for eye toggle ── */
         .input-wrapper {
             position: relative;
             margin-bottom: 20px;
@@ -107,12 +98,8 @@
         .input-wrapper input { padding-right: 44px; }
         input:focus { border-color: #b7410e; }
 
-        /* ── Simple inputs (no eye button) — still need bottom margin ── */
-        .plain-input {
-            margin-bottom: 20px;
-        }
+        .plain-input { margin-bottom: 20px; }
 
-        /* ── Eye toggle button ── */
         .eye-btn {
             position: absolute;
             right: 12px;
@@ -192,7 +179,41 @@
         .confirm-status.match    { color: #22c55e; }
         .confirm-status.no-match { color: #ef4444; }
 
-        /* ── Register button ── */
+        /* ── CAPTCHA box ── (same style as login page for consistency) */
+        .captcha-box {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 20px;
+        }
+
+        .captcha-question {
+            font-size: 14px;
+            color: #b7410e;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .captcha-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .captcha-input-row input {
+            width: 90px;
+            margin-bottom: 0;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .captcha-hint {
+            font-size: 11px;
+            color: #444444;
+            margin-top: 8px;
+        }
+
         .btn {
             width: 100%;
             background: #b7410e;
@@ -209,7 +230,6 @@
         .btn:hover  { background: #d4501a; }
         .btn:active { transform: scale(0.98); }
 
-        /* ── Trust badge ── */
         .trust-badge {
             text-align: center;
             margin-top: 12px;
@@ -247,7 +267,6 @@
             margin: -40px -36px 32px -36px;
         }
 
-        /* ── CSE250 watermark ── */
         .watermark {
             position: fixed;
             bottom: 16px;
@@ -263,7 +282,6 @@
 </head>
 <body>
 
-<!-- ── CipherShield branding ── -->
 <div class="company-name">CipherShield</div>
 <div class="company-tagline">Secure Access. Zero Compromise.</div>
 
@@ -273,7 +291,7 @@
     <h1>Create Account</h1>
     <div class="subtitle">All new accounts are assigned the Viewer role</div>
 
-    <!-- Full Name — plain input, no eye button needed -->
+    <!-- Full Name -->
     <label for="actual_name">Full Name</label>
     <input class="plain-input" type="text" id="actual_name" placeholder="Enter your full name" />
 
@@ -301,7 +319,7 @@
         <div class="strength-label" id="strength-label">Start typing to check strength</div>
     </div>
 
-    <!-- Rules checklist — shown while typing -->
+    <!-- Rules checklist -->
     <div class="password-rules" id="password-rules">
         <p>Password must have:</p>
         <div class="rule" id="rule-length">
@@ -321,7 +339,7 @@
         </div>
     </div>
 
-    <!-- Confirm Password — with eye toggle + match indicator -->
+    <!-- Confirm Password -->
     <label for="confirm_password">Confirm Password</label>
     <div class="input-wrapper">
         <input type="password" id="confirm_password" placeholder="Re-enter your password"
@@ -332,28 +350,75 @@
     <!-- Match status -->
     <div class="confirm-status" id="confirm-status"></div>
 
+    <!-- ── Math CAPTCHA ──
+         Same logic as the login page — random question generated on load,
+         refreshes automatically if the user answers incorrectly. -->
+    <div class="captcha-box">
+        <div class="captcha-question" id="captcha-question">Loading question...</div>
+        <div class="captcha-input-row">
+            <input type="number" id="captcha-answer" placeholder="Your answer" />
+        </div>
+        <div class="captcha-hint">Answer this to prove you are not a bot</div>
+    </div>
+
     <!-- Register Button -->
     <button class="btn" onclick="handleRegister()">Create Account</button>
 
-    <!-- Trust badge -->
     <div class="trust-badge">🔒 Secured Connection</div>
-
-    <!-- Message area -->
     <div class="message" id="message"></div>
 
-    <!-- Login link -->
     <div class="bottom-link">
         Already have an account? <a href="login.html">Login here</a>
     </div>
 </div>
 
-<!-- CSE250 watermark -->
 <div class="watermark">CSE250 — Database Management Systems</div>
 
 
 <script>
 
-    // ── Show / Hide password toggle ────────────────────────────
+    // ── CAPTCHA: stores the correct answer for the current question ──
+    var captchaAnswer = 0;
+
+
+    // ── generateCaptcha ────────────────────────────────────────────
+    // Identical logic to the login page.
+    // Creates a new random addition or subtraction question.
+    // Stores the correct answer in captchaAnswer (not shown to user).
+    // ──────────────────────────────────────────────────────────────
+    function generateCaptcha() {
+
+        var num1 = Math.floor(Math.random() * 15) + 1;  // random: 1 to 15
+        var num2 = Math.floor(Math.random() * 15) + 1;  // random: 1 to 15
+
+        var useAddition = Math.random() > 0.5;
+
+        var questionText = "";
+
+        if (useAddition) {
+            captchaAnswer = num1 + num2;
+            questionText  = "What is " + num1 + " + " + num2 + "?";
+        } else {
+            // Bigger number first so result is never negative
+            if (num1 < num2) {
+                var temp = num1;
+                num1 = num2;
+                num2 = temp;
+            }
+            captchaAnswer = num1 - num2;
+            questionText  = "What is " + num1 + " − " + num2 + "?";
+        }
+
+        document.getElementById("captcha-question").textContent = questionText;
+        document.getElementById("captcha-answer").value = "";
+    }
+
+
+    // Generate a question when the page loads
+    generateCaptcha();
+
+
+    // ── Show / Hide password toggle ────────────────────────────────
     function toggleVisibility(fieldId, btn) {
         var field = document.getElementById(fieldId);
         if (field.type === "password") {
@@ -366,11 +431,7 @@
     }
 
 
-    // ── Password Strength Checker ──────────────────────────────
-    // Based on NIST SP 800-63B and OWASP guidelines.
-    // Weak   = under 8 chars
-    // Medium = 8–11 chars, or missing some rules
-    // Strong = 12+ chars with all 5 rule types satisfied
+    // ── Password Strength Checker ──────────────────────────────────
     function checkPasswordStrength() {
 
         var password = document.getElementById("password").value;
@@ -436,7 +497,7 @@
     }
 
 
-    // ── Confirm Password Match Checker ─────────────────────────
+    // ── Confirm Password Match Checker ─────────────────────────────
     function checkPasswordMatch() {
         var password        = document.getElementById("password").value;
         var confirmPassword = document.getElementById("confirm_password").value;
@@ -458,9 +519,15 @@
     }
 
 
-    // ── handleRegister ─────────────────────────────────────────
-    // Smart per-field validation — each empty field gets its own
-    // specific message so the user knows exactly what to fill in.
+    // ── handleRegister ──────────────────────────────────────────────
+    // Order of checks:
+    //   1. Each form field (name, username, email, password, confirm)
+    //   2. Passwords match?
+    //   3. Password strong enough?
+    //   4. CAPTCHA answer provided?
+    //   5. CAPTCHA answer correct? → if wrong, refresh question
+    //   6. All good → send to server
+    // ───────────────────────────────────────────────────────────────
     function handleRegister() {
 
         var actual_name     = document.getElementById("actual_name").value.trim();
@@ -470,7 +537,7 @@
         var confirmPassword = document.getElementById("confirm_password").value.trim();
         var msgBox          = document.getElementById("message");
 
-        // Check each field individually and show a specific message
+        // ── Field validation ──
         if (!actual_name) {
             msgBox.className  = "message error";
             msgBox.textContent = "Please enter your full name.";
@@ -507,6 +574,24 @@
             return;
         }
 
+        // ── CAPTCHA check ──
+        var userAnswer = document.getElementById("captcha-answer").value.trim();
+
+        if (userAnswer === "") {
+            msgBox.className  = "message error";
+            msgBox.textContent = "Please answer the security question.";
+            return;
+        }
+
+        if (parseInt(userAnswer) !== captchaAnswer) {
+            // Wrong — generate a brand new question
+            generateCaptcha();
+            msgBox.className  = "message error";
+            msgBox.textContent = "Incorrect answer. A new question has been generated.";
+            return;
+        }
+
+        // ── All checks passed — send to server ──
         msgBox.className  = "message";
         msgBox.textContent = "Creating your account...";
 
@@ -538,6 +623,7 @@
                 msgBox.textContent = "Could not reach server. Is it running?";
             });
     }
+
 
     // Allow pressing Enter to submit
     document.addEventListener("keydown", function(e) {
