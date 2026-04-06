@@ -15,7 +15,9 @@
             color: #f0f0f0;
         }
 
-        /* ── Top header bar ── */
+        /* ═══════════════════════════════════════════════
+           HEADER
+        ═══════════════════════════════════════════════ */
         .header {
             background: #111111;
             border-bottom: 1px solid rgba(183, 65, 14, 0.3);
@@ -25,8 +27,6 @@
             justify-content: space-between;
         }
 
-        /* ── CipherShield name in header ──
-           Styled with orange glow to match the login/register pages. */
         .header-left .app-name {
             font-size: 18px;
             font-weight: bold;
@@ -80,14 +80,130 @@
         }
         .logout-btn:hover { background: rgba(183,65,14,0.15); }
 
-        /* ── Main content area ── */
+        /* ═══════════════════════════════════════════════
+           MAIN CONTENT AREA
+        ═══════════════════════════════════════════════ */
         .main {
             padding: 32px;
             max-width: 960px;
             margin: 0 auto;
         }
 
-        /* ── Welcome card ── */
+        /* ═══════════════════════════════════════════════
+           PHASE 8 — MY PROFILE CARD
+           Shows name, username, email, role, permissions.
+           Visible to all 3 roles — sits at the very top.
+        ═══════════════════════════════════════════════ */
+        .profile-card {
+            background: #111111;
+            border: 1px solid rgba(183,65,14,0.3);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+        }
+
+        /* The large circular avatar with initials */
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(183, 65, 14, 0.15);
+            border: 2px solid rgba(183, 65, 14, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
+            color: #b7410e;
+            flex-shrink: 0;
+            letter-spacing: 1px;
+        }
+
+        .profile-details { flex: 1; }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #f0f0f0;
+            margin-bottom: 4px;
+        }
+
+        /* Small info rows: username, email */
+        .profile-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 14px;
+        }
+        .profile-meta-row {
+            font-size: 13px;
+            color: #666666;
+        }
+        .profile-meta-row span {
+            color: #999999;
+            margin-left: 4px;
+        }
+
+        /* Permissions shown as small tags */
+        .profile-permissions-title {
+            font-size: 11px;
+            color: #555555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .profile-permissions-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .perm-tag {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #777777;
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 5px;
+        }
+
+        /* ═══════════════════════════════════════════════
+           PHASE 8 — QUICK STATS PANEL
+           3 stat boxes for SuperAdmin, 1 for Admin.
+        ═══════════════════════════════════════════════ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 0;
+        }
+
+        /* Each individual stat box */
+        .stat-box {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 18px 20px;
+        }
+
+        /* The big number */
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #b7410e;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        /* Label below the number */
+        .stat-label {
+            font-size: 12px;
+            color: #555555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ═══════════════════════════════════════════════
+           EXISTING — WELCOME CARD
+        ═══════════════════════════════════════════════ */
         .welcome-card {
             background: #111111;
             border: 1px solid rgba(183,65,14,0.25);
@@ -116,7 +232,9 @@
             border-radius: 6px;
         }
 
-        /* ── Section cards ── */
+        /* ═══════════════════════════════════════════════
+           EXISTING — SECTION CARDS
+        ═══════════════════════════════════════════════ */
         .section {
             background: #111111;
             border: 1px solid #222222;
@@ -134,7 +252,9 @@
         }
         .section-title span { color: #b7410e; }
 
-        /* ── Version cards ── */
+        /* ═══════════════════════════════════════════════
+           EXISTING — VERSION CARDS
+        ═══════════════════════════════════════════════ */
         .version-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -164,10 +284,7 @@
             margin-bottom: 6px;
             font-family: monospace;
         }
-        .version-card .version-minimum {
-            font-size: 12px;
-            color: #555555;
-        }
+        .version-card .version-minimum { font-size: 12px; color: #555555; }
         .version-warning {
             display: inline-block;
             background: rgba(183, 65, 14, 0.2);
@@ -189,7 +306,9 @@
             margin-top: 8px;
         }
 
-        /* ── Users Table ── */
+        /* ═══════════════════════════════════════════════
+           EXISTING — USERS TABLE
+        ═══════════════════════════════════════════════ */
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
         th {
             text-align: left;
@@ -233,7 +352,223 @@
         }
         .change-btn:hover { background: #d4501a; }
 
-        /* ── Info box for Viewer ── */
+        /* ═══════════════════════════════════════════════
+           PHASE 8 — MESSAGING SYSTEM
+           Shared styles used across all 3 role inboxes.
+        ═══════════════════════════════════════════════ */
+
+        /* Form for composing a new message (used by Viewer + Admin escalation) */
+        .message-form {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .message-form-title {
+            font-size: 13px;
+            color: #888888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        /* Text input fields inside the message form */
+        .msg-input {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #f0f0f0;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 12px;
+            font-family: Arial, sans-serif;
+        }
+        .msg-input:focus { border-color: #b7410e; }
+
+        /* Multiline textarea for the message body */
+        .msg-textarea {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #f0f0f0;
+            outline: none;
+            resize: vertical;
+            min-height: 90px;
+            transition: border-color 0.2s;
+            margin-bottom: 12px;
+            font-family: Arial, sans-serif;
+        }
+        .msg-textarea:focus { border-color: #b7410e; }
+
+        /* Send / submit button inside the form */
+        .send-btn {
+            background: #b7410e;
+            border: none;
+            color: #f0f0f0;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .send-btn:hover { background: #d4501a; }
+
+        /* Small status message shown after sending / error */
+        .form-status {
+            font-size: 13px;
+            margin-top: 10px;
+            min-height: 18px;
+        }
+        .form-status.success { color: #22c55e; }
+        .form-status.error   { color: #ef4444; }
+
+        /* ── Individual message card in the inbox ── */
+        .msg-card {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 12px;
+        }
+
+        /* Top row: sender name + role tag + date on the right */
+        .msg-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .msg-sender {
+            font-size: 13px;
+            font-weight: bold;
+            color: #f0f0f0;
+        }
+
+        /* Small role tag e.g. "Viewer" or "Admin" */
+        .msg-role-tag {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
+        }
+        .tag-viewer     { background: rgba(136,136,136,0.15); border: 1px solid #555; color: #888; }
+        .tag-admin      { background: rgba(183,65,14,0.1);    border: 1px solid #b7410e88; color: #d4501a; }
+        .tag-superadmin { background: rgba(183,65,14,0.2);    border: 1px solid #b7410e;   color: #b7410e; }
+
+        .msg-date {
+            font-size: 11px;
+            color: #444444;
+        }
+
+        /* Subject line */
+        .msg-subject {
+            font-size: 14px;
+            font-weight: bold;
+            color: #cccccc;
+            margin-bottom: 6px;
+        }
+
+        /* Message body text */
+        .msg-body {
+            font-size: 13px;
+            color: #777777;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        /* ── Reply already exists — shown in green box ── */
+        .msg-reply-box {
+            background: rgba(34, 197, 94, 0.05);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-top: 8px;
+        }
+        .msg-reply-label {
+            font-size: 11px;
+            color: #22c55e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .msg-reply-text {
+            font-size: 13px;
+            color: #86efac;
+            line-height: 1.5;
+        }
+
+        /* ── Awaiting reply badge ── */
+        .msg-pending {
+            display: inline-block;
+            font-size: 11px;
+            color: #f59e0b;
+            background: rgba(245,158,11,0.1);
+            border: 1px solid rgba(245,158,11,0.3);
+            border-radius: 6px;
+            padding: 2px 10px;
+            margin-top: 4px;
+        }
+
+        /* ── Reply form shown inside each inbox message card ── */
+        .reply-form {
+            margin-top: 12px;
+            border-top: 1px solid #1a1a1a;
+            padding-top: 12px;
+        }
+        .reply-form textarea {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #f0f0f0;
+            outline: none;
+            resize: vertical;
+            min-height: 70px;
+            margin-bottom: 8px;
+            font-family: Arial, sans-serif;
+            transition: border-color 0.2s;
+        }
+        .reply-form textarea:focus { border-color: #b7410e; }
+
+        /* Smaller reply submit button */
+        .reply-btn {
+            background: #b7410e;
+            border: none;
+            color: #f0f0f0;
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .reply-btn:hover { background: #d4501a; }
+
+        /* ── No messages placeholder ── */
+        .no-messages {
+            text-align: center;
+            padding: 32px 0;
+            color: #444444;
+            font-size: 14px;
+        }
+
+        /* ═══════════════════════════════════════════════
+           EXISTING — INFO BOX (Viewer section was using it)
+        ═══════════════════════════════════════════════ */
         .info-box {
             background: #1a1a1a;
             border: 1px solid #333333;
@@ -244,24 +579,27 @@
         }
         .info-box strong { color: #f0f0f0; }
 
-        /* ── Toast notification ── */
+        /* ═══════════════════════════════════════════════
+           EXISTING — TOAST NOTIFICATION
+        ═══════════════════════════════════════════════ */
         #toast {
             position: fixed;
             bottom: 32px;
             right: 32px;
             background: #111111;
-            border: 1px solid #b7410e;
+            border: 1px solid rgba(183,65,14,0.4);
             color: #f0f0f0;
             padding: 12px 20px;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 14px;
             display: none;
-            box-shadow: 0 0 20px rgba(183,65,14,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            z-index: 9999;
         }
 
-        .loading { color: #555555; font-size: 13px; font-style: italic; }
-
-        /* ── CSE250 watermark — bottom-right corner ── */
+        /* ═══════════════════════════════════════════════
+           WATERMARK + LOADING
+        ═══════════════════════════════════════════════ */
         .watermark {
             position: fixed;
             bottom: 16px;
@@ -272,44 +610,78 @@
             color: #2a2a2a;
             pointer-events: none;
         }
+        .loading { color: #444444; font-size: 13px; }
 
     </style>
 </head>
 <body>
 
-<!-- ── Header ── -->
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════════════════════ -->
 <div class="header">
     <div class="header-left">
-        <!-- Updated: CipherShield branding with orange glow -->
         <div class="app-name">CipherShield</div>
         <div class="app-subtitle">Secure Access. Zero Compromise.</div>
     </div>
     <div class="header-right">
         <div class="user-info">
-            <div class="user-name" id="header-name">Loading...</div>
+            <div class="user-name" id="header-name"></div>
             <div id="header-badge"></div>
         </div>
         <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 </div>
 
-<!-- ── Main Content ── -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════════════════ -->
 <div class="main">
 
-    <!-- Welcome Card — shown to everyone -->
+    <!-- ── PHASE 8: My Profile Card (all 3 roles see this) ─────────
+         Built from sessionStorage data — no server call needed.
+         Shows the avatar initials, name, username, email,
+         role badge, and all permission tags. -->
+    <div class="profile-card" id="profile-card">
+        <div class="profile-avatar" id="profile-avatar">?</div>
+        <div class="profile-details">
+            <div class="profile-name" id="profile-name">Loading...</div>
+            <div class="profile-meta">
+                <div class="profile-meta-row">Username: <span id="profile-username">—</span></div>
+                <div class="profile-meta-row">Email: <span id="profile-email">—</span></div>
+                <div class="profile-meta-row">Role: <span id="profile-role">—</span></div>
+            </div>
+            <div class="profile-permissions-title">Your Permissions</div>
+            <div class="profile-permissions-list" id="profile-permissions"></div>
+        </div>
+    </div>
+
+    <!-- ── Welcome card (existing) ── -->
     <div class="welcome-card">
-        <h2 id="welcome-text">Welcome</h2>
-        <p id="welcome-sub">You are logged in.</p>
-        <div class="permissions-title">Your Permissions</div>
+        <h2 id="welcome-text">Welcome!</h2>
+        <p id="welcome-sub">Loading your dashboard...</p>
+        <div class="permissions-title">Permissions Granted</div>
         <div class="permissions-list" id="permissions-list">
             <span class="loading">Loading permissions...</span>
         </div>
     </div>
 
-    <!-- ── SuperAdmin Section ── -->
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SUPERADMIN SECTION
+    ════════════════════════════════════════════════════════════ -->
     <div id="superadmin-section" style="display:none;">
 
-        <!-- Version Check Card — SuperAdmin only -->
+        <!-- PHASE 8: Quick Stats Panel — SuperAdmin sees everything -->
+        <div class="section">
+            <div class="section-title">Quick Stats <span>— System Overview</span></div>
+            <div class="stats-grid" id="superadmin-stats-grid">
+                <span class="loading">Fetching stats...</span>
+            </div>
+        </div>
+
+        <!-- Existing: Version Check -->
         <div class="section">
             <div class="section-title">System Version Info <span>— SuperAdmin Only</span></div>
             <div class="version-grid" id="version-grid">
@@ -317,7 +689,7 @@
             </div>
         </div>
 
-        <!-- All Users Table -->
+        <!-- Existing: All Users Table with role change -->
         <div class="section">
             <div class="section-title">All Registered Users <span>— SuperAdmin View</span></div>
             <div id="users-table-container">
@@ -325,49 +697,116 @@
             </div>
         </div>
 
+        <!-- PHASE 8: Full Inbox — SuperAdmin sees ALL messages -->
+        <div class="section">
+            <div class="section-title">Full Message Inbox <span>— All Messages</span></div>
+            <div id="superadmin-inbox">
+                <span class="loading">Loading messages...</span>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ── Admin Section ── -->
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ADMIN SECTION
+    ════════════════════════════════════════════════════════════ -->
     <div id="admin-section" style="display:none;">
+
+        <!-- PHASE 8: Quick Stats Panel — Admin sees total users only -->
+        <div class="section">
+            <div class="section-title">Quick Stats <span>— User Summary</span></div>
+            <div class="stats-grid" id="admin-stats-grid">
+                <span class="loading">Fetching stats...</span>
+            </div>
+        </div>
+
+        <!-- Existing: User list (read only for Admin) -->
         <div class="section">
             <div class="section-title">User List <span>— Admin View</span></div>
             <div id="admin-users-container">
                 <span class="loading">Fetching users from database...</span>
             </div>
         </div>
-    </div>
 
-    <!-- ── Viewer Section ── -->
-    <div id="viewer-section" style="display:none;">
+        <!-- PHASE 8: Admin Inbox — Viewer requests sent to Admin -->
         <div class="section">
-            <div class="section-title">Your Access <span>— Viewer</span></div>
-            <div class="info-box">
-                You have <strong>Viewer access</strong>. You can view the dashboard and see the user list.
-                To get more permissions, contact your CipherShield administrator.
+            <div class="section-title">Support Inbox <span>— Viewer Requests</span></div>
+            <div id="admin-inbox">
+                <span class="loading">Loading messages...</span>
             </div>
         </div>
+
+        <!-- PHASE 8: Escalate to SuperAdmin form -->
+        <div class="section">
+            <div class="section-title">Escalate Issue <span>— Send to SuperAdmin</span></div>
+            <div class="message-form">
+                <div class="message-form-title">Send a message to SuperAdmin</div>
+                <input  class="msg-input"    id="admin-escalate-subject"  type="text" placeholder="Subject — briefly describe the issue" />
+                <textarea class="msg-textarea" id="admin-escalate-body"   placeholder="Describe the issue in detail..."></textarea>
+                <button class="send-btn" onclick="adminEscalate()">Send to SuperAdmin</button>
+                <div class="form-status" id="admin-escalate-status"></div>
+            </div>
+        </div>
+
     </div>
 
-</div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         VIEWER SECTION
+    ════════════════════════════════════════════════════════════ -->
+    <div id="viewer-section" style="display:none;">
+
+        <!-- PHASE 8: Send Support Request form -->
+        <div class="section">
+            <div class="section-title">Send Support Request <span>— Contact Admin</span></div>
+            <div class="message-form">
+                <div class="message-form-title">Write your message to Admin</div>
+                <input  class="msg-input"    id="viewer-subject"  type="text" placeholder="Subject — briefly describe your issue" />
+                <textarea class="msg-textarea" id="viewer-body"   placeholder="Describe your issue or question in detail..."></textarea>
+                <button class="send-btn" onclick="viewerSendMessage()">Send Message</button>
+                <div class="form-status" id="viewer-send-status"></div>
+            </div>
+        </div>
+
+        <!-- PHASE 8: Viewer's past messages + replies -->
+        <div class="section">
+            <div class="section-title">My Requests <span>— History & Replies</span></div>
+            <div id="viewer-inbox">
+                <span class="loading">Loading your messages...</span>
+            </div>
+        </div>
+
+    </div>
+
+</div><!-- end .main -->
+
 
 <!-- Toast notification -->
 <div id="toast"></div>
 
-<!-- CSE250 watermark — bottom-right, very subtle -->
+<!-- CSE250 watermark -->
 <div class="watermark">CSE250 — Database Management Systems</div>
 
 
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════════ -->
 <script>
 
-    // ── Read logged-in user from sessionStorage ───────────────
+    // ── Read logged-in user from sessionStorage ─────────────────
+    // The login route stores the full user object here after login.
     var user = JSON.parse(sessionStorage.getItem("user"));
 
-    // If not logged in, go back to login
+    // If not logged in, redirect to login page
     if (!user) {
         window.location.href = "login.html";
     }
 
-    // ── Fill in header ────────────────────────────────────────
+
+    // ════════════════════════════════════════════════════════════
+    // FILL IN HEADER
+    // ════════════════════════════════════════════════════════════
     document.getElementById("header-name").textContent = user.actual_name;
 
     var badgeEl    = document.getElementById("header-badge");
@@ -377,11 +816,13 @@
     else                                 badgeClass += "badge-viewer";
     badgeEl.innerHTML = '<span class="' + badgeClass + '">' + user.role.toUpperCase() + '</span>';
 
-    // ── Fill in welcome card ──────────────────────────────────
+
+    // ════════════════════════════════════════════════════════════
+    // FILL IN WELCOME CARD (existing)
+    // ════════════════════════════════════════════════════════════
     document.getElementById("welcome-text").textContent = "Welcome, " + user.actual_name + "!";
     document.getElementById("welcome-sub").textContent  = "You are logged in as: " + user.role;
 
-    // Show permissions as tags
     var permList = document.getElementById("permissions-list");
     if (user.permissions && user.permissions.length > 0) {
         permList.innerHTML = "";
@@ -395,22 +836,418 @@
         permList.innerHTML = '<span class="loading">No permissions found.</span>';
     }
 
-    // ── Show the right section based on role ──────────────────
-    if (user.role === "SuperAdmin") {
-        document.getElementById("superadmin-section").style.display = "block";
-        loadVersionInfo();
-        loadAllUsers("superadmin");
 
-    } else if (user.role === "Admin") {
-        document.getElementById("admin-section").style.display = "block";
-        loadAllUsers("admin");
+    // ════════════════════════════════════════════════════════════
+    // PHASE 8: BUILD PROFILE CARD
+    //
+    // All data comes from sessionStorage — no server call needed.
+    // The login route already saved name, username, email, role,
+    // and permissions when the user logged in.
+    // ════════════════════════════════════════════════════════════
+    function buildProfileCard() {
 
-    } else {
-        document.getElementById("viewer-section").style.display = "block";
+        // Generate initials from the user's actual name
+        // e.g. "Jawal Shah" → "JS"
+        var nameParts = user.actual_name.trim().split(" ");
+        var initials  = nameParts.map(function(part) {
+            return part.charAt(0).toUpperCase();
+        }).join("").substring(0, 2);   // max 2 letters
+
+        document.getElementById("profile-avatar").textContent   = initials;
+        document.getElementById("profile-name").textContent     = user.actual_name;
+        document.getElementById("profile-username").textContent = user.username;
+        document.getElementById("profile-email").textContent    = user.email || "Not provided";
+        document.getElementById("profile-role").textContent     = user.role;
+
+        // Show permissions as small tags
+        var permContainer = document.getElementById("profile-permissions");
+        permContainer.innerHTML = "";
+
+        if (user.permissions && user.permissions.length > 0) {
+            user.permissions.forEach(function(perm) {
+                var tag       = document.createElement("span");
+                tag.className = "perm-tag";
+                tag.textContent = perm;
+                permContainer.appendChild(tag);
+            });
+        } else {
+            permContainer.innerHTML = '<span style="color:#444;font-size:12px">None assigned</span>';
+        }
     }
 
 
-    // ── loadVersionInfo ───────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+    // PHASE 8: LOAD QUICK STATS
+    //
+    // Calls GET /stats which returns:
+    //   totalUsers, totalPermissions, roleCounts (array)
+    //
+    // SuperAdmin → shows all 3 role counts + total permissions
+    // Admin      → shows only total users
+    // ════════════════════════════════════════════════════════════
+    function loadStats(targetGridId, role) {
+
+        fetch("/stats")
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+
+                if (!data.success) {
+                    document.getElementById(targetGridId).innerHTML =
+                        '<span style="color:#ef4444">Could not load stats: ' + data.message + '</span>';
+                    return;
+                }
+
+                var grid = document.getElementById(targetGridId);
+                grid.innerHTML = "";
+
+                if (role === "SuperAdmin") {
+
+                    // Total Users box
+                    grid.appendChild(makeStatBox(data.totalUsers, "Total Users"));
+
+                    // One box per role (SuperAdmin / Admin / Viewer counts)
+                    data.roleCounts.forEach(function(row) {
+                        grid.appendChild(makeStatBox(row.count, row.role_name + "s"));
+                    });
+
+                    // Total Permissions box
+                    grid.appendChild(makeStatBox(data.totalPermissions, "Total Permissions"));
+
+                } else if (role === "Admin") {
+
+                    // Admin only sees total user count
+                    grid.appendChild(makeStatBox(data.totalUsers, "Total Users"));
+                }
+            })
+            .catch(function() {
+                document.getElementById(targetGridId).innerHTML =
+                    '<span style="color:#ef4444">Could not reach server.</span>';
+            });
+    }
+
+    // Helper: creates one stat box element
+    function makeStatBox(number, label) {
+        var box       = document.createElement("div");
+        box.className = "stat-box";
+        box.innerHTML =
+            '<div class="stat-number">' + number + '</div>' +
+            '<div class="stat-label">'  + label  + '</div>';
+        return box;
+    }
+
+
+    // ════════════════════════════════════════════════════════════
+    // PHASE 8: LOAD INBOX
+    //
+    // Calls GET /inbox?role=X&user_id=Y
+    //
+    // The server returns different messages based on role:
+    //   Viewer     → their own sent messages + replies
+    //   Admin      → messages sent TO Admin (target_role = Admin)
+    //   SuperAdmin → ALL messages in the system
+    //
+    // showReplyForm = true means we render a reply textarea
+    // inside each message card (for Admin and SuperAdmin).
+    // Viewers don't reply so they see false.
+    // ════════════════════════════════════════════════════════════
+    function loadInbox(containerId, role, showReplyForm) {
+
+        var url = "/inbox?role=" + role;
+        if (role === "Viewer") {
+            url += "&user_id=" + user.user_id;
+        }
+
+        fetch(url)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+
+                var container = document.getElementById(containerId);
+
+                if (!data.success) {
+                    container.innerHTML =
+                        '<span style="color:#ef4444">Could not load inbox: ' + data.message + '</span>';
+                    return;
+                }
+
+                var messages = data.messages;
+
+                if (messages.length === 0) {
+                    container.innerHTML = '<div class="no-messages">📭 No messages yet.</div>';
+                    return;
+                }
+
+                container.innerHTML = "";
+
+                messages.forEach(function(msg) {
+                    container.appendChild(buildMessageCard(msg, showReplyForm));
+                });
+            })
+            .catch(function() {
+                document.getElementById(containerId).innerHTML =
+                    '<span style="color:#ef4444">Could not reach server.</span>';
+            });
+    }
+
+
+    // ════════════════════════════════════════════════════════════
+    // PHASE 8: BUILD A SINGLE MESSAGE CARD
+    //
+    // Creates the HTML element for one message in the inbox.
+    // Shows: sender name, role tag, date, subject, body.
+    // If a reply exists → shows it in a green box.
+    // If no reply + showReplyForm is true → shows a reply textarea.
+    // ════════════════════════════════════════════════════════════
+    function buildMessageCard(msg, showReplyForm) {
+
+        var card       = document.createElement("div");
+        card.className = "msg-card";
+
+        // Format the date — cut off the milliseconds part
+        var sentDate = new Date(msg.sent_at).toLocaleString();
+
+        // Pick the right CSS class for the sender's role tag
+        var roleTagClass = "msg-role-tag ";
+        if      (msg.sender_role === "SuperAdmin") roleTagClass += "tag-superadmin";
+        else if (msg.sender_role === "Admin")      roleTagClass += "tag-admin";
+        else                                       roleTagClass += "tag-viewer";
+
+        // Target badge — shows who this message was sent TO
+        var targetTagClass = "msg-role-tag ";
+        if (msg.target_role === "SuperAdmin") targetTagClass += "tag-superadmin";
+        else                                  targetTagClass += "tag-admin";
+
+        // Build the card HTML
+        var html =
+            '<div class="msg-card-header">' +
+            '<div>' +
+            '<span class="msg-sender">From: ' + msg.sender_name + '</span>' +
+            '<span class="' + roleTagClass + '">' + msg.sender_role + '</span>' +
+            ' <span style="font-size:11px;color:#555">→</span> ' +
+            '<span class="' + targetTagClass + '">' + msg.target_role + '</span>' +
+            '</div>' +
+            '<span class="msg-date">' + sentDate + '</span>' +
+            '</div>' +
+            '<div class="msg-subject">' + msg.subject + '</div>' +
+            '<div class="msg-body">'    + msg.message_body + '</div>';
+
+        // If a reply already exists, show it
+        if (msg.reply) {
+            html +=
+                '<div class="msg-reply-box">' +
+                '<div class="msg-reply-label">✓ Reply</div>' +
+                '<div class="msg-reply-text">' + msg.reply + '</div>' +
+                '</div>';
+
+        } else {
+            // No reply yet
+            if (showReplyForm) {
+                // Show a reply form (Admin and SuperAdmin can reply)
+                html +=
+                    '<div class="reply-form" id="reply-form-' + msg.message_id + '">' +
+                    '<textarea placeholder="Type your reply here..." ' +
+                    'id="reply-text-' + msg.message_id + '"></textarea>' +
+                    '<button class="reply-btn" onclick="submitReply(' + msg.message_id + ')">Send Reply</button>' +
+                    '<div class="form-status" id="reply-status-' + msg.message_id + '"></div>' +
+                    '</div>';
+            } else {
+                // Viewer just sees "awaiting reply"
+                html += '<div class="msg-pending">⏳ Awaiting reply</div>';
+            }
+        }
+
+        card.innerHTML = html;
+        return card;
+    }
+
+
+    // ════════════════════════════════════════════════════════════
+    // PHASE 8: SUBMIT REPLY
+    //
+    // Called when Admin or SuperAdmin clicks "Send Reply"
+    // on a message card.
+    //
+    // Sends POST /reply with:
+    //   message_id → which message to reply to
+    //   reply      → the text typed in the textarea
+    //   replied_by → the logged-in user's ID
+    //
+    // On success: hides the reply form, shows the reply in green,
+    // and shows a toast notification.
+    // ════════════════════════════════════════════════════════════
+    function submitReply(messageId) {
+
+        var replyText  = document.getElementById("reply-text-"   + messageId).value.trim();
+        var statusEl   = document.getElementById("reply-status-" + messageId);
+
+        if (!replyText) {
+            statusEl.className   = "form-status error";
+            statusEl.textContent = "Please type a reply before sending.";
+            return;
+        }
+
+        statusEl.className   = "form-status";
+        statusEl.textContent = "Sending...";
+
+        fetch("/reply", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                message_id: messageId,
+                reply:      replyText,
+                replied_by: user.user_id
+            })
+        })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    showToast("Reply sent successfully!");
+
+                    // Reload the inbox so the replied message shows the green reply box
+                    if (user.role === "Admin") {
+                        loadInbox("admin-inbox", "Admin", true);
+                    } else if (user.role === "SuperAdmin") {
+                        loadInbox("superadmin-inbox", "SuperAdmin", true);
+                    }
+
+                } else {
+                    statusEl.className   = "form-status error";
+                    statusEl.textContent = "Error: " + data.message;
+                }
+            })
+            .catch(function() {
+                statusEl.className   = "form-status error";
+                statusEl.textContent = "Could not reach server.";
+            });
+    }
+
+
+    // ════════════════════════════════════════════════════════════
+    // PHASE 8: VIEWER — SEND SUPPORT REQUEST
+    //
+    // Called when Viewer clicks "Send Message".
+    // Sends POST /sendmessage with:
+    //   sender_id, sender_role = "Viewer", target_role = "Admin"
+    // On success: clears the form and reloads their inbox.
+    // ════════════════════════════════════════════════════════════
+    function viewerSendMessage() {
+
+        var subject = document.getElementById("viewer-subject").value.trim();
+        var body    = document.getElementById("viewer-body").value.trim();
+        var status  = document.getElementById("viewer-send-status");
+
+        if (!subject) {
+            status.className   = "form-status error";
+            status.textContent = "Please enter a subject.";
+            return;
+        }
+        if (!body) {
+            status.className   = "form-status error";
+            status.textContent = "Please write your message.";
+            return;
+        }
+
+        status.className   = "form-status";
+        status.textContent = "Sending...";
+
+        fetch("/sendmessage", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                sender_id:    user.user_id,
+                sender_role:  "Viewer",
+                target_role:  "Admin",
+                subject:      subject,
+                message_body: body
+            })
+        })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    status.className   = "form-status success";
+                    status.textContent = "✓ Message sent! Admin will reply soon.";
+
+                    // Clear the form fields
+                    document.getElementById("viewer-subject").value = "";
+                    document.getElementById("viewer-body").value    = "";
+
+                    // Reload their message history so the new one appears
+                    loadInbox("viewer-inbox", "Viewer", false);
+
+                } else {
+                    status.className   = "form-status error";
+                    status.textContent = "Error: " + data.message;
+                }
+            })
+            .catch(function() {
+                status.className   = "form-status error";
+                status.textContent = "Could not reach server.";
+            });
+    }
+
+
+    // ════════════════════════════════════════════════════════════
+    // PHASE 8: ADMIN — ESCALATE TO SUPERADMIN
+    //
+    // Admin sends their own message TO SuperAdmin.
+    // Uses the same /sendmessage route as Viewer, but
+    // sender_role = "Admin" and target_role = "SuperAdmin".
+    // ════════════════════════════════════════════════════════════
+    function adminEscalate() {
+
+        var subject = document.getElementById("admin-escalate-subject").value.trim();
+        var body    = document.getElementById("admin-escalate-body").value.trim();
+        var status  = document.getElementById("admin-escalate-status");
+
+        if (!subject) {
+            status.className   = "form-status error";
+            status.textContent = "Please enter a subject.";
+            return;
+        }
+        if (!body) {
+            status.className   = "form-status error";
+            status.textContent = "Please write your message.";
+            return;
+        }
+
+        status.className   = "form-status";
+        status.textContent = "Sending...";
+
+        fetch("/sendmessage", {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                sender_id:    user.user_id,
+                sender_role:  "Admin",
+                target_role:  "SuperAdmin",
+                subject:      subject,
+                message_body: body
+            })
+        })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    status.className   = "form-status success";
+                    status.textContent = "✓ Escalated to SuperAdmin successfully.";
+
+                    // Clear the form
+                    document.getElementById("admin-escalate-subject").value = "";
+                    document.getElementById("admin-escalate-body").value    = "";
+
+                } else {
+                    status.className   = "form-status error";
+                    status.textContent = "Error: " + data.message;
+                }
+            })
+            .catch(function() {
+                status.className   = "form-status error";
+                status.textContent = "Could not reach server.";
+            });
+    }
+
+
+    // ════════════════════════════════════════════════════════════
+    // EXISTING: LOAD VERSION INFO (SuperAdmin only)
+    // ════════════════════════════════════════════════════════════
     function loadVersionInfo() {
         fetch("/version")
             .then(function(res) { return res.json(); })
@@ -455,7 +1292,9 @@
     }
 
 
-    // ── loadAllUsers ──────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+    // EXISTING: LOAD ALL USERS (SuperAdmin + Admin)
+    // ════════════════════════════════════════════════════════════
     function loadAllUsers(viewerRole) {
         fetch("/users")
             .then(function(res) { return res.json(); })
@@ -510,7 +1349,9 @@
     }
 
 
-    // ── changeRole ────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+    // EXISTING: CHANGE ROLE (SuperAdmin only)
+    // ════════════════════════════════════════════════════════════
     function changeRole(userId) {
         var select  = document.getElementById("role-select-" + userId);
         var newRole = select.value;
@@ -535,19 +1376,56 @@
     }
 
 
-    // ── logout ────────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+    // EXISTING: LOGOUT
+    // ════════════════════════════════════════════════════════════
     function logout() {
         sessionStorage.removeItem("user");
         window.location.href = "login.html";
     }
 
 
-    // ── showToast ─────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════
+    // EXISTING: SHOW TOAST
+    // ════════════════════════════════════════════════════════════
     function showToast(msg) {
         var toast         = document.getElementById("toast");
         toast.textContent = msg;
         toast.style.display = "block";
         setTimeout(function() { toast.style.display = "none"; }, 3000);
+    }
+
+
+    // ════════════════════════════════════════════════════════════
+    // INITIALISE — Run everything based on the logged-in role
+    // ════════════════════════════════════════════════════════════
+
+    // Profile card is the same for all roles — always build it
+    buildProfileCard();
+
+    if (user.role === "SuperAdmin") {
+
+        document.getElementById("superadmin-section").style.display = "block";
+
+        loadStats("superadmin-stats-grid", "SuperAdmin");   // Phase 8
+        loadVersionInfo();                                  // existing
+        loadAllUsers("superadmin");                         // existing
+        loadInbox("superadmin-inbox", "SuperAdmin", true);  // Phase 8
+
+    } else if (user.role === "Admin") {
+
+        document.getElementById("admin-section").style.display = "block";
+
+        loadStats("admin-stats-grid", "Admin");    // Phase 8
+        loadAllUsers("admin");                     // existing
+        loadInbox("admin-inbox", "Admin", true);   // Phase 8
+
+    } else {
+
+        // Viewer
+        document.getElementById("viewer-section").style.display = "block";
+
+        loadInbox("viewer-inbox", "Viewer", false);   // Phase 8
     }
 
 </script>
