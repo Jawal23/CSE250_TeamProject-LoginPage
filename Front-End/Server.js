@@ -38,10 +38,11 @@ const SALT_ROUNDS = 10;
 // Connect to MariaDB
 // ============================================================
 const db = mysql.createConnection({
-    host:     "localhost",
-    user:     "root",
-    password: "cse250",
-    database: "admin_login_system",
+    host:     process.env.DB_HOST     || "localhost",
+    user:     process.env.DB_USER     || "root",
+    password: process.env.DB_PASSWORD || "cse250",
+    database: process.env.DB_NAME     || "admin_login_system",
+    port:     process.env.DB_PORT     || 3306,
 });
 
 db.connect(function (err) {
@@ -169,7 +170,7 @@ app.post("/login", function (req, res) {
             const roleQuery = `
                 SELECT roles.role_id, roles.role_name
                 FROM user_roles
-                JOIN roles ON user_roles.role_id = roles.role_id
+                         JOIN roles ON user_roles.role_id = roles.role_id
                 WHERE user_roles.user_id = ?
             `;
             db.query(roleQuery, [user.user_id], function (err3, roleResults) {
@@ -183,7 +184,7 @@ app.post("/login", function (req, res) {
                 const permissionsQuery = `
                     SELECT permissions.permission_name
                     FROM role_permissions
-                    JOIN permissions ON role_permissions.permission_id = permissions.permission_id
+                             JOIN permissions ON role_permissions.permission_id = permissions.permission_id
                     WHERE role_permissions.role_id = ?
                 `;
                 db.query(permissionsQuery, [roleId], function (err4, permissionResults) {
@@ -227,8 +228,8 @@ app.get("/users", function (req, res) {
             users.email,
             roles.role_name
         FROM users
-        LEFT JOIN user_roles ON users.user_id    = user_roles.user_id
-        LEFT JOIN roles      ON user_roles.role_id = roles.role_id
+                 LEFT JOIN user_roles ON users.user_id    = user_roles.user_id
+                 LEFT JOIN roles      ON user_roles.role_id = roles.role_id
         ORDER BY users.created_at DESC
     `;
 
@@ -341,7 +342,7 @@ app.get("/stats", function (req, res) {
     const roleCountQuery        = `
         SELECT roles.role_name, COUNT(user_roles.user_id) AS count
         FROM roles
-        LEFT JOIN user_roles ON roles.role_id = user_roles.role_id
+            LEFT JOIN user_roles ON roles.role_id = user_roles.role_id
         GROUP BY roles.role_name
     `;
 
@@ -413,7 +414,7 @@ app.get("/inbox", function (req, res) {
         inboxQuery = `
             SELECT messages.*, users.actual_name AS sender_name
             FROM messages
-            JOIN users ON messages.sender_id = users.user_id
+                     JOIN users ON messages.sender_id = users.user_id
             WHERE messages.sender_id = ?
             ORDER BY messages.sent_at DESC
         `;
@@ -423,7 +424,7 @@ app.get("/inbox", function (req, res) {
         inboxQuery = `
             SELECT messages.*, users.actual_name AS sender_name
             FROM messages
-            JOIN users ON messages.sender_id = users.user_id
+                     JOIN users ON messages.sender_id = users.user_id
             WHERE messages.target_role = 'Admin'
             ORDER BY messages.sent_at DESC
         `;
@@ -432,7 +433,7 @@ app.get("/inbox", function (req, res) {
         inboxQuery = `
             SELECT messages.*, users.actual_name AS sender_name
             FROM messages
-            JOIN users ON messages.sender_id = users.user_id
+                     JOIN users ON messages.sender_id = users.user_id
             ORDER BY messages.sent_at DESC
         `;
 

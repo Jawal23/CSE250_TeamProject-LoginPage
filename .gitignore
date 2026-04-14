@@ -1,12 +1,9 @@
-nhy# Default ignored files
-/shelf/
-/.idea/workspace.xml
-# Ignored default folder with query files
-/queries/
-# Datasource local storage ignored files
-/dataSources/
-/dataSources.local.xml
-# Editor-based HTTP Client requests
-/httpRequests/
+# ── Node.js dependencies ──────────────────────────────────────
+# This folder is auto-generated when you run "npm install"
+# It can contain thousands of files — never push it to GitHub
+node_modules/
 
-.idea/
+# ── Local environment variables ───────────────────────────────
+# This file stores secret passwords for local development
+# It must NEVER be pushed to GitHub — keep it private
+.env
