@@ -214,6 +214,21 @@
             margin-top: 8px;
         }
 
+        /* ── Password Reset Warning box ──
+           Sits above the CAPTCHA to remind the user to remember their
+           username/email — they'll need one of these to reset their password later. */
+        .reset-warning {
+            background: rgba(183, 65, 14, 0.08);
+            border: 1px solid rgba(183, 65, 14, 0.40);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #c0724a;
+            line-height: 1.6;
+        }
+        .reset-warning strong { color: #b7410e; }
+
         .btn {
             width: 100%;
             background: #b7410e;
@@ -349,6 +364,14 @@
 
     <!-- Match status -->
     <div class="confirm-status" id="confirm-status"></div>
+
+    <!-- ── Password Reset Warning ─────────────────────────────────────
+         This reminds the user to note down their username or email.
+         If they ever forget their password, they'll need one of these
+         to prove their identity on the forgot-password page. -->
+    <div class="reset-warning">
+        ⚠️ <strong>Important:</strong> Remember your username or email address — you will need one of these to reset your password if you ever forget it.
+    </div>
 
     <!-- ── Math CAPTCHA ──
          Same logic as the login page — random question generated on load,

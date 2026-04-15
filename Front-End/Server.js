@@ -16,6 +16,10 @@
 //   POST /sendmessage — Viewer or Admin sends a message
 //   GET  /inbox       — fetches inbox messages based on role
 //   POST /reply       — Admin or SuperAdmin replies to a message
+//
+//   ── Phase 7 — Password Reset routes ──
+//   POST /forgotpassword — checks if username or email exists in users table
+//   POST /resetpassword  — hashes new password with bcrypt and updates DB
 // ============================================================
 
 const express = require("express");
@@ -342,7 +346,7 @@ app.get("/stats", function (req, res) {
     const roleCountQuery        = `
         SELECT roles.role_name, COUNT(user_roles.user_id) AS count
         FROM roles
-            LEFT JOIN user_roles ON roles.role_id = user_roles.role_id
+                 LEFT JOIN user_roles ON roles.role_id = user_roles.role_id
         GROUP BY roles.role_name
     `;
 
@@ -477,6 +481,92 @@ app.post("/reply", function (req, res) {
         }
 
         res.json({ success: true, message: "Reply saved successfully." });
+    });
+});
+
+
+// ============================================================
+// ── PHASE 7 — PASSWORD RESET ROUTES ─────────────────────────
+// ============================================================
+
+
+// ============================================================
+// Route 11: POST /forgotpassword
+//
+// What it does:
+//   The user types their username OR email on the forgot-password page.
+//   We search the database to see if any account matches.
+//   If yes  → { success: true }  — account found, let them set a new password
+//   If no   → { success: false } — no account with that username or email
+//
+// NOTE: This route does NOT change anything in the database.
+//       It only checks if the account exists.
+// ============================================================
+app.post("/forgotpassword", function (req, res) {
+
+    // The user can type either their username OR their email
+    var identifier = req.body.identifier;
+
+    if (!identifier) {
+        return res.json({ success: false, message: "Please enter your username or email." });
+    }
+
+    // Search the users table — check both username and email columns
+    var findQuery = "SELECT user_id FROM users WHERE username = ? OR email = ?";
+    db.query(findQuery, [identifier, identifier], function (err, results) {
+
+        if (err) return res.json({ success: false, message: "Database error: " + err.message });
+
+        if (results.length === 0) {
+            // No account found with that username or email
+            return res.json({ success: false, message: "No account found with that username or email." });
+        }
+
+        // Account found — tell the frontend to show the new password form (Step 2)
+        res.json({ success: true, message: "Account found." });
+    });
+});
+
+
+// ============================================================
+// Route 12: POST /resetpassword
+//
+// What it does:
+//   The user has passed Step 1 (account found) and now submits a new password.
+//   We receive: identifier (username or email) + newPassword
+//   Steps:
+//     1. Hash the new password using bcrypt (same way /register does it)
+//     2. UPDATE the users table — set password_hash to the new hash
+//        WHERE username = identifier OR email = identifier
+//     3. Return { success: true } on success
+// ============================================================
+app.post("/resetpassword", function (req, res) {
+
+    var identifier   = req.body.identifier;    // the username or email the user typed in Step 1
+    var newPassword  = req.body.newPassword;   // the new password they want to set
+
+    if (!identifier || !newPassword) {
+        return res.json({ success: false, message: "Identifier and new password are required." });
+    }
+
+    // Hash the new password before saving — same as /register
+    bcrypt.hash(newPassword, SALT_ROUNDS, function (err, hashedPassword) {
+
+        if (err) return res.json({ success: false, message: "Could not hash password: " + err.message });
+
+        // Update the password_hash column for the matching account
+        var updateQuery = "UPDATE users SET password_hash = ? WHERE username = ? OR email = ?";
+        db.query(updateQuery, [hashedPassword, identifier, identifier], function (err2, result) {
+
+            if (err2) return res.json({ success: false, message: "Could not update password: " + err2.message });
+
+            if (result.affectedRows === 0) {
+                // Safety check — no rows were updated (account disappeared between Step 1 and Step 2)
+                return res.json({ success: false, message: "Account not found. Please try again." });
+            }
+
+            res.json({ success: true, message: "Password reset successfully! You can now login with your new password." });
+        });
     });
 });
 

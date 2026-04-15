@@ -195,6 +195,18 @@
         .message.error   { color: #ef4444; }
         .message.success { color: #22c55e; }
 
+        /* ── Forgot Password link — sits below the trust badge ── */
+        .forgot-link {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        .forgot-link a {
+            color: #666666;
+            text-decoration: none;
+        }
+        .forgot-link a:hover { color: #b7410e; text-decoration: underline; }
+
         .bottom-link {
             text-align: center;
             margin-top: 24px;
@@ -261,6 +273,12 @@
     <button class="btn" onclick="handleLogin()">Login</button>
 
     <div class="trust-badge">🔒 Secured Connection</div>
+
+    <!-- Forgot password — small subtle link below the trust badge -->
+    <div class="forgot-link">
+        <a href="forgot-password.html">Forgot your password?</a>
+    </div>
+
     <div class="message" id="message"></div>
 
     <div class="bottom-link">
