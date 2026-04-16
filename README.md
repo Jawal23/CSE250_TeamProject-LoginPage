@@ -1,4 +1,4 @@
-# CipherShield - Admin Login System with RBAC
+# 🛡️ CipherShield - Admin Login System with RBAC
 
 > **Course:** CSE250 Database Management Systems
 >
@@ -10,7 +10,7 @@
 
 ---
 
-## What is CipherShield?
+## ❓ What is CipherShield?
 
 CipherShield is a **Role-Based Access Control (RBAC) Login System** built as a database management systems project. The core idea is straightforward - users register, log in, and are shown a personalised dashboard based on their assigned role. What they can see and do on that dashboard is entirely controlled by the role stored in the database.
 
@@ -18,13 +18,13 @@ The system solves a real-world problem: **how do you make sure different users i
 
 ---
 
-## Live Hosted Website
+## 🌐 Live Hosted Website
 
-🌐 Website   | https://ciphershield-3qq1.onrender.com/login.html                   
+Website   | https://ciphershield-3qq1.onrender.com/login.html                   
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Layer          | Technology                  |
 |----------------|-----------------------------|
@@ -37,7 +37,7 @@ The system solves a real-world problem: **how do you make sure different users i
 
 ---
 
-## The 3 Roles and What They Can Do
+## 🛂 The 3 Roles and What They Can Do
 
 The entire system is built around three roles. Every user has exactly one role, and that role determines everything they see on the dashboard.
 
@@ -59,7 +59,7 @@ The entire system is built around three roles. Every user has exactly one role, 
 
 ---
 
-## Database Structure (6 Tables)
+## 🏗️ Database Structure (6 Tables)
 
 | Table              | Purpose                                                                       |
 |--------------------|-------------------------------------------------------------------------------|
@@ -130,7 +130,7 @@ erDiagram
 
 ---
 
-## Key SQL Queries
+## 📝 Key SQL Queries
 
 ### Query 1 - Get all users with their assigned role name
 
@@ -160,7 +160,7 @@ WHERE role_permissions.role_id = ?;
 
 ---
 
-## Backend API Routes
+## 🔙 Backend API Routes
 
 All routes are in a single file - `Server.js` - built using Node.js and Express.
 
@@ -181,7 +181,7 @@ All routes are in a single file - `Server.js` - built using Node.js and Express.
 
 ---
 
-## Frontend Pages
+## 🖥️ Frontend Pages
 
 All pages follow the same visual theme: **black background (`#020101`) with burnt orange (`#b7410e`) accents**, a glowing card UI, and entrance animations.
 
@@ -210,7 +210,7 @@ All pages follow the same visual theme: **black background (`#020101`) with burn
 
 ---
 
-## Security Features
+## 🔐 Security Features
 
 | Feature                         | Implementation Detail                                           |
 |---------------------------------|-----------------------------------------------------------------|
@@ -224,7 +224,7 @@ All pages follow the same visual theme: **black background (`#020101`) with burn
 
 ---
 
-## How to Run Locally
+## ▶️ How to Run Locally
 
 This project can run entirely on your local machine too. No external hosting or cloud service is required.
 
@@ -264,7 +264,7 @@ http://localhost:3000/login.html
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 .
@@ -283,7 +283,7 @@ http://localhost:3000/login.html
 
 ---
 
-## Team
+## 👥 Team
 
 | Name          | Enrolment Number                  |
 |----------------|-----------------------------|
